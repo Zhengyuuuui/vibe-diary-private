@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&amp;family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,700;1,6..72,400&amp;family=Manrope:wght@400;600;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container-low": "#f4f4f0",
+                    "on-primary-fixed": "#493e2d",
+                    "secondary-container": "#e3e2e0",
+                    "primary": "#695d4a",
+                    "error": "#9e422c",
+                    "on-primary-container": "#5c503e",
+                    "inverse-on-surface": "#9d9d9a",
+                    "surface-container-lowest": "#ffffff",
+                    "surface": "#faf9f6",
+                    "on-tertiary-fixed": "#474c2b",
+                    "on-surface-variant": "#5c605c",
+                    "error-container": "#fe8b70",
+                    "tertiary": "#5d623f",
+                    "on-tertiary-container": "#5a5f3c",
+                    "secondary-fixed-dim": "#d5d4d2",
+                    "inverse-primary": "#fdebd3",
+                    "background": "#faf9f6",
+                    "on-secondary-fixed-variant": "#5b5c5a",
+                    "surface-dim": "#d6dbd5",
+                    "primary-fixed-dim": "#e3d2bb",
+                    "on-secondary-fixed": "#3e403e",
+                    "surface-container-highest": "#e0e4de",
+                    "on-background": "#2f3430",
+                    "primary-dim": "#5d513f",
+                    "tertiary-fixed-dim": "#e4e9bc",
+                    "surface-container": "#edeeea",
+                    "primary-container": "#f2e0c8",
+                    "error-dim": "#5c1202",
+                    "on-surface": "#2f3430",
+                    "tertiary-fixed": "#f2f7ca",
+                    "on-primary": "#fff6ee",
+                    "on-tertiary": "#f8fdcf",
+                    "outline-variant": "#afb3ae",
+                    "secondary-fixed": "#e3e2e0",
+                    "surface-variant": "#e0e4de",
+                    "outline": "#777c77",
+                    "secondary-dim": "#525351",
+                    "secondary": "#5e5f5d",
+                    "inverse-surface": "#0d0f0d",
+                    "surface-container-high": "#e6e9e4",
+                    "on-secondary": "#faf9f6",
+                    "on-error": "#fff7f6",
+                    "tertiary-dim": "#515634",
+                    "surface-tint": "#695d4a",
+                    "on-primary-fixed-variant": "#665a47"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "fontFamily": {
+                    "notoSerif": ["Noto Serif SC", "serif"],
+                    "newsreader": ["Newsreader", "serif"],
+                    "manrope": ["Manrope", "sans-serif"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .linen-texture {
+            background-color: #fdfcf8;
+            background-image: radial-gradient(#695d4a 0.5px, transparent 0.5px);
+            background-size: 4px 4px;
+            opacity: 0.15;
+        }
+        .grid-paper {
+            background-size: 30px 30px;
+            background-image: linear-gradient(to right, rgba(105, 93, 74, 0.05) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(105, 93, 74, 0.05) 1px, transparent 1px);
+        }
+        .page-shadow-left {
+            box-shadow: inset -20px 0 30px -10px rgba(105, 93, 74, 0.12);
+        }
+        .page-shadow-right {
+            box-shadow: inset 20px 0 30px -10px rgba(105, 93, 74, 0.12);
+        }
+        .book-spine {
+            background: linear-gradient(to right, rgba(105, 93, 74, 0.1), rgba(105, 93, 74, 0.05) 50%, rgba(105, 93, 74, 0.1));
+        }
+        .cursor-blink {
+            width: 2px;
+            height: 1.2em;
+            background-color: #2f3430;
+            display: inline-block;
+            vertical-align: middle;
+            animation: blink 1s step-end infinite;
+        }
+        @keyframes blink {
+            from, to { opacity: 1; }
+            50% { opacity: 0; }
+        }
+    </style>
+</head>
+<body class="bg-surface font-newsreader text-on-surface min-h-screen flex flex-col selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopAppBar -->
+<header class="fixed docked full-width top-0 z-50 bg-transparent backdrop-blur-xl flex justify-between items-center w-full px-12 py-6 max-w-screen-2xl mx-auto">
+<div class="font-notoSerif text-lg font-bold text-[#695d4a] dark:text-[#f4f4f0]">
+            Midnight Pages
+        </div>
+<nav class="hidden md:flex gap-12 items-center">
+<a class="font-notoSerif tracking-tighter text-sm text-[#695d4a]/60 dark:text-[#f4f4f0]/60 hover:text-[#695d4a] transition-colors duration-300" href="#">Archived</a>
+<a class="font-notoSerif tracking-tighter text-sm text-[#695d4a]/60 dark:text-[#f4f4f0]/60 hover:text-[#695d4a] transition-colors duration-300" href="#">Library</a>
+<a class="font-notoSerif tracking-tighter text-sm text-[#695d4a]/60 dark:text-[#f4f4f0]/60 hover:text-[#695d4a] transition-colors duration-300" href="#">Studies</a>
+</nav>
+<div class="flex items-center gap-6">
+<button class="material-symbols-outlined text-[#695d4a] dark:text-[#f4f4f0] hover:opacity-70 transition-opacity">menu_book</button>
+<button class="material-symbols-outlined text-[#695d4a] dark:text-[#f4f4f0] hover:opacity-70 transition-opacity">settings</button>
+<div class="w-8 h-8 rounded-full bg-surface-container-high overflow-hidden">
+<img alt="Reader Profile" class="w-full h-full object-cover" data-alt="minimalist aesthetic illustration of a person reading a book in profile view, soft organic lines, warm neutrals" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC4MR4XMV5vDY9OVqpe5f8OfBDPddZE1M9nmg9wtAHtpUJo2zMeSMnWWhlJ59i-zQA4Ny4XSUt1_C7qaEss5cv6sK1QzgxL-yoykH4Uml_Nb7Ls9sSB3pCEAd2dSx6gOOUdpatPXziLrUMzPY9xgrCIvZTdXCveoB5Xmat_rZrNutz1GQEKbzu5nT0vWGfABTARedBu7aF3cI7HilUBKL8sYaktVtC0z2y92pYZlt90o0fPoXA3x-SBP6dcpBgxi8_seG5BY7QePVA"/>
+</div>
+</div>
+</header>
+<!-- Main Writing Workspace -->
+<main class="flex-grow flex items-center justify-center pt-24 pb-16 px-6 bg-gradient-to-b from-[#F3EFE0] to-[#FAF9F6]">
+<div class="relative w-full max-w-6xl aspect-[1.4/1] flex shadow-[0_30px_60px_-15px_rgba(105,93,74,0.15)] rounded-lg overflow-hidden group">
+<!-- Left Page: Textured Aged Linen -->
+<div class="relative flex-1 bg-[#fdfcf8] overflow-hidden">
+<div class="absolute inset-0 linen-texture"></div>
+<div class="absolute inset-0 page-shadow-left"></div>
+<!-- Decorative Content on Left Page -->
+<div class="relative h-full flex flex-col items-center justify-center p-16 text-center">
+<div class="mb-8 opacity-20">
+<span class="material-symbols-outlined text-6xl" style="font-variation-settings: 'wght' 200;">local_library</span>
+</div>
+<div class="font-notoSerif text-primary/40 space-y-4">
+<p class="text-xs tracking-[0.4em] uppercase font-manrope">Midnight Musings</p>
+<h2 class="text-2xl font-light italic">The silent hour reveals the truest ink.</h2>
+</div>
+<div class="absolute bottom-12 left-12">
+<p class="font-manrope text-[10px] tracking-widest text-primary/30 uppercase">Vol. IV / 2024</p>
+</div>
+</div>
+</div>
+<!-- Center Spine -->
+<div class="w-8 book-spine relative z-10 flex flex-col justify-center items-center">
+<div class="w-[1px] h-4/5 bg-primary/5"></div>
+</div>
+<!-- Right Page: Smooth Grid Paper -->
+<div class="relative flex-1 bg-surface-container-lowest overflow-hidden">
+<div class="absolute inset-0 grid-paper"></div>
+<div class="absolute inset-0 page-shadow-right"></div>
+<!-- Writing Area -->
+<div class="relative h-full p-16 pt-24 flex flex-col">
+<div class="mb-12 flex justify-between items-baseline border-b border-primary/5 pb-2">
+<h1 class="font-notoSerif text-sm font-bold text-primary tracking-widest">午夜书写</h1>
+<p class="font-manrope text-[10px] text-primary/40 uppercase tracking-tighter">May 24, 2024 · 00:00</p>
+</div>
+<div class="flex-grow font-notoSerif text-on-surface/80 leading-[30px] relative">
+<!-- Simulated Grid Lines Alignment -->
+<div class="absolute top-0 left-0">
+<span class="cursor-blink"></span>
+</div>
+<div class="space-y-[30px]">
+<!-- Content would go here in a real app -->
+<p class="opacity-0">Placeholder to maintain grid rhythm and flow</p>
+</div>
+</div>
+<div class="mt-auto pt-8 border-t border-primary/5 flex justify-between items-center">
+<div class="flex gap-4">
+<button class="material-symbols-outlined text-primary/40 hover:text-primary transition-colors text-lg">format_italic</button>
+<button class="material-symbols-outlined text-primary/40 hover:text-primary transition-colors text-lg">format_quote</button>
+<button class="material-symbols-outlined text-primary/40 hover:text-primary transition-colors text-lg">ink_pen</button>
+</div>
+<div class="font-manrope text-[10px] text-primary/30 uppercase tracking-widest">
+                            0 words · 0 chars
+                        </div>
+</div>
+</div>
+</div>
+<!-- Page Curl Visual Hint (Subtle) -->
+<div class="absolute top-0 right-0 w-12 h-12 bg-gradient-to-bl from-surface-dim/20 to-transparent pointer-events-none"></div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="w-full px-12 py-8 border-t border-[#695d4a]/5 bg-[#faf9f6] dark:bg-[#1a1a1a] flex justify-between items-center z-20">
+<div class="font-manrope text-[10px] uppercase tracking-widest text-[#695d4a]/40">
+            © Midnight Pages · A Literary Sanctuary
+        </div>
+<nav class="flex gap-8">
+<a class="font-manrope text-[10px] uppercase tracking-widest text-[#695d4a]/40 hover:text-[#695d4a] transition-colors" href="#">Privacy</a>
+<a class="font-manrope text-[10px] uppercase tracking-widest text-[#695d4a]/40 hover:text-[#695d4a] transition-colors" href="#">Terms</a>
+<a class="font-manrope text-[10px] uppercase tracking-widest text-[#695d4a]/40 hover:text-[#695d4a] transition-colors" href="#">Manifesto</a>
+</nav>
+</footer>
+</body></html>

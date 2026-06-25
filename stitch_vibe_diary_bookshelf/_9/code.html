@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&amp;family=Newsreader:ital,wght@0,400;0,600;1,400&amp;family=Manrope:wght@400;600;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary": "#695d4a",
+                        "on-secondary-container": "#515250",
+                        "inverse-surface": "#0d0f0d",
+                        "surface-container-high": "#e6e9e4",
+                        "on-surface-variant": "#5c605c",
+                        "on-surface": "#2f3430",
+                        "on-secondary-fixed-variant": "#5b5c5a",
+                        "surface-tint": "#695d4a",
+                        "secondary-container": "#e3e2e0",
+                        "surface-container-highest": "#e0e4de",
+                        "surface-bright": "#faf9f6",
+                        "on-primary-fixed": "#493e2d",
+                        "surface-container-lowest": "#ffffff",
+                        "secondary": "#5e5f5d",
+                        "on-error-container": "#742410",
+                        "error-dim": "#5c1202",
+                        "on-background": "#2f3430",
+                        "on-tertiary-container": "#5a5f3c",
+                        "surface-container-low": "#f4f4f0",
+                        "surface": "#faf9f6",
+                        "on-error": "#fff7f6",
+                        "inverse-primary": "#fdebd3",
+                        "surface-variant": "#e0e4de",
+                        "on-secondary-fixed": "#3e403e",
+                        "on-primary-container": "#5c503e",
+                        "inverse-on-surface": "#9d9d9a",
+                        "tertiary-fixed": "#f2f7ca",
+                        "outline-variant": "#afb3ae",
+                        "tertiary-container": "#f2f7ca",
+                        "secondary-fixed-dim": "#d5d4d2",
+                        "secondary-dim": "#525351",
+                        "on-tertiary": "#f8fdcf",
+                        "tertiary-fixed-dim": "#e4e9bc",
+                        "error-container": "#fe8b70",
+                        "on-secondary": "#faf9f6",
+                        "error": "#9e422c",
+                        "on-primary-fixed-variant": "#665a47",
+                        "tertiary": "#5d623f",
+                        "on-primary": "#fff6ee",
+                        "primary-container": "#f2e0c8",
+                        "surface-container": "#edeeea",
+                        "outline": "#777c77",
+                        "tertiary-dim": "#515634",
+                        "background": "#faf9f6",
+                        "secondary-fixed": "#e3e2e0",
+                        "primary-fixed-dim": "#e3d2bb",
+                        "surface-dim": "#d6dbd5",
+                        "on-tertiary-fixed-variant": "#646945",
+                        "on-tertiary-fixed": "#474c2b",
+                        "primary-dim": "#5d513f",
+                        "primary-fixed": "#f2e0c8"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Noto Serif SC", "serif"],
+                        "body": ["Newsreader", "serif"],
+                        "label": ["Manrope", "sans-serif"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #faf9f6;
+            color: #2f3430;
+        }
+        .vertical-text {
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+        }
+    </style>
+</head>
+<body class="font-body selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopNavBar -->
+<header class="bg-[#faf9f6]/85 dark:bg-stone-900/85 backdrop-blur-xl docked full-width top-0 sticky z-50 flex justify-between items-center w-full px-6 py-4">
+<div class="flex items-center gap-4">
+<span class="text-xl font-bold text-[#695d4a] dark:text-[#d1c7b7] font-headline tracking-tight">氛围日记</span>
+</div>
+<div class="hidden md:flex items-center gap-8">
+<a class="text-[#695d4a] dark:text-[#f4f4f0] font-bold hover:text-[#5d513f] transition-colors duration-300 font-label text-sm" href="#">书卷</a>
+<a class="text-[#695d4a]/60 dark:text-[#f4f4f0]/60 hover:text-[#5d513f] transition-colors duration-300 font-label text-sm" href="#">收藏</a>
+<a class="text-[#695d4a]/60 dark:text-[#f4f4f0]/60 hover:text-[#5d513f] transition-colors duration-300 font-label text-sm" href="#">撰写</a>
+<a class="text-[#695d4a]/60 dark:text-[#f4f4f0]/60 hover:text-[#5d513f] transition-colors duration-300 font-label text-sm" href="#">设置</a>
+</div>
+<div class="flex items-center gap-3">
+<div class="relative group">
+<input class="bg-surface-container-low border-none focus:ring-0 text-sm font-label rounded-full py-2 pl-4 pr-10 w-48 md:w-64 transition-all focus:w-72" placeholder="搜索往事..." type="text"/>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-primary/40">search</span>
+</div>
+<button class="p-2 text-primary/60 hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="filter_list">filter_list</span>
+</button>
+<button class="p-2 text-primary/60 hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+</div>
+</header>
+<main class="max-w-6xl mx-auto px-6 py-12">
+<!-- Archive Header Section -->
+<section class="mb-20 flex flex-col md:flex-row md:items-end justify-between gap-8">
+<div class="max-w-2xl">
+<span class="font-label text-xs uppercase tracking-[0.3em] text-primary/40 mb-4 block">Archives &amp; Memories</span>
+<h1 class="font-headline text-5xl md:text-7xl font-bold text-primary tracking-tighter leading-tight mb-6">时光之书</h1>
+<p class="text-on-surface-variant text-lg leading-relaxed max-w-md italic">
+                    “在这喧嚣的尘世里，每一笔触都是对宁静时刻的温柔凭吊。”
+                </p>
+</div>
+<div class="flex items-center gap-6">
+<div class="text-right">
+<span class="block font-headline text-3xl font-bold text-primary">128</span>
+<span class="font-label text-[10px] uppercase tracking-widest text-primary/40">Total Entries</span>
+</div>
+<div class="h-12 w-[1px] bg-outline-variant/20"></div>
+<div class="text-right">
+<span class="block font-headline text-3xl font-bold text-primary">24</span>
+<span class="font-label text-[10px] uppercase tracking-widest text-primary/40">Collections</span>
+</div>
+</div>
+</section>
+<!-- Timeline Grid -->
+<div class="space-y-24">
+<!-- Month Group: December -->
+<div class="relative">
+<div class="flex flex-col md:flex-row gap-8 items-start">
+<div class="md:sticky md:top-24 w-full md:w-32 flex md:flex-col items-baseline md:items-start justify-between md:justify-start">
+<span class="font-headline text-4xl font-bold text-primary leading-none">十二月</span>
+<span class="font-label text-sm text-primary/40 tracking-widest">2023</span>
+</div>
+<div class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-12">
+<!-- Entry Card 1 -->
+<div class="group cursor-pointer">
+<div class="relative aspect-[4/5] mb-6 overflow-hidden rounded-lg bg-surface-container-low transition-colors group-hover:bg-surface-container-high">
+<img class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-700" data-alt="a peaceful winter morning window with frost patterns and soft sunlight hitting an open book on a wooden table" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDxZqmHiC6dJpcIFTfssbjXMazi50G4PdCGxcKP3dSTwa4JXdxcM0ZGiJLtS6ThWHfRE7B0uoNWIdjkPXy-Y2oAw9_rfgbVfzlmZB89FHzIYkbIUczPc2pJY9qofZ8bdmaAfjdexAfWOKNZwSr0n9hAbbyulmxI-v8kb6aD2YW1qLDEKvo3N7aG1160Xg9z8VxDdGHSfILe1D7nCNL9hQ2_OgkUed5G71HSAn5WSG0rIsYmfCLfV7ABoo1Tntb78xDwwRaYKPKefWA"/>
+<div class="absolute top-6 left-6 flex flex-col items-center">
+<span class="vertical-text font-headline text-2xl font-bold text-on-surface bg-white/40 backdrop-blur-md px-2 py-4 rounded-full">初雪之晨</span>
+</div>
+<div class="absolute bottom-6 right-6">
+<span class="material-symbols-outlined text-primary bg-white/60 backdrop-blur-md p-3 rounded-full" data-icon="ac_unit" style="font-variation-settings: 'FILL' 1;">ac_unit</span>
+</div>
+</div>
+<div class="space-y-3">
+<div class="flex items-center gap-4 font-label text-[10px] uppercase tracking-widest text-primary/60">
+<span>Dec 24, 2023</span>
+<span class="w-1 h-1 bg-outline-variant rounded-full"></span>
+<span>平安夜</span>
+</div>
+<p class="text-on-surface-variant font-body leading-relaxed line-clamp-3">
+                                    窗外的第一场雪悄无声息地落下。煮了一壶肉桂苹果茶，香气在狭小的房间里弥漫开来。这一刻，世界仿佛只剩下了火炉的噼啪声和纸页翻动的沙沙声...
+                                </p>
+</div>
+</div>
+<!-- Entry Card 2 -->
+<div class="group cursor-pointer mt-12 md:mt-24">
+<div class="bg-surface-container-lowest p-8 rounded-none shadow-[0_20px_40px_rgba(105,93,74,0.03)] border-b-2 border-primary/5 group-hover:shadow-[0_20px_40px_rgba(105,93,74,0.06)] transition-all">
+<div class="flex justify-between items-start mb-8">
+<div>
+<span class="font-label text-[10px] uppercase tracking-widest text-primary/40 block mb-1">Thursday</span>
+<span class="font-headline text-3xl font-bold text-primary">12</span>
+</div>
+<span class="material-symbols-outlined text-primary/30" data-icon="cloud">cloud</span>
+</div>
+<h3 class="font-headline text-xl font-bold text-primary mb-4">巷弄里的咖啡香</h3>
+<p class="text-on-surface-variant font-body leading-relaxed mb-8">
+                                    路过那家已经开了十年的老店，老板依然记得我喜欢的比例。那种有些苦涩却带着坚果余韵的味道，像极了今年冬天的步调。
+                                </p>
+<div class="flex items-center gap-2">
+<span class="bg-surface-container-high px-3 py-1 rounded-full font-label text-[10px] text-primary/60">生活碎片</span>
+<span class="bg-surface-container-high px-3 py-1 rounded-full font-label text-[10px] text-primary/60">午后</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Month Group: November -->
+<div class="relative">
+<div class="flex flex-col md:flex-row gap-8 items-start">
+<div class="md:sticky md:top-24 w-full md:w-32 flex md:flex-col items-baseline md:items-start justify-between md:justify-start">
+<span class="font-headline text-4xl font-bold text-primary/40 leading-none">十一月</span>
+<span class="font-label text-sm text-primary/40 tracking-widest">2023</span>
+</div>
+<div class="flex-1 grid grid-cols-1 md:grid-cols-3 gap-8">
+<!-- Entry Card 3 (Small Bento) -->
+<div class="group cursor-pointer col-span-1 bg-surface-container-low p-6 rounded-xl hover:bg-surface-container-highest transition-colors">
+<div class="flex items-center justify-between mb-4">
+<span class="font-label text-[10px] text-primary/40">11.18</span>
+<span class="material-symbols-outlined text-primary/40 text-sm" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+<p class="font-body italic text-on-surface leading-relaxed mb-4">“深夜阅读时的顿悟，比白天的阳光更刺眼。”</p>
+<div class="h-[1px] w-8 bg-primary/20"></div>
+</div>
+<!-- Entry Card 4 (Full Width Bento Style Content) -->
+<div class="group cursor-pointer md:col-span-2 flex gap-6 bg-[#f2e0c8]/20 p-6 rounded-xl items-center border border-primary/5">
+<img class="w-24 h-24 rounded-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" data-alt="close-up of dried ginkgo leaves on a stone pathway with soft focus background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBPVMS-77JXbwokeGGlqYUOqSty1RUN-80jRqfC6HjK1_F4yTtjNW1NamgrRB7met45KuUGz1BF9amdmVAZkenJXGfT6aqGtLH2H_pAp8o6h6xRgIRow0P6GK5VlLV9RKbFQRONEsg2uDlb4_DwK7HmzWnx-aq-3rrgQUWUU3OT0UI4P7s4rrVk0FxKfMLtdh-hsCsgrmnafhi_2Nc0LeiqrFLI0RJJ3jkgChKSJxWqkg9vXiiJ-qNq7Bqh9YuRs0jiQrE_LHaP5c8"/>
+<div class="flex-1">
+<div class="font-label text-[10px] uppercase tracking-widest text-primary/40 mb-1">Nov 05</div>
+<h4 class="font-headline text-lg font-bold text-primary mb-1">银杏叶黄了</h4>
+<p class="text-sm text-on-surface-variant font-body line-clamp-1">满地金黄像是给大地铺上了华丽的信笺...</p>
+</div>
+<span class="material-symbols-outlined text-primary/20" data-icon="arrow_forward_ios">arrow_forward_ios</span>
+</div>
+<!-- Entry Card 5 -->
+<div class="group cursor-pointer md:col-span-3">
+<div class="flex flex-col md:flex-row gap-12 items-center">
+<div class="w-full md:w-1/2 aspect-video rounded-2xl overflow-hidden shadow-sm">
+<img class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" data-alt="a minimalist study desk with a single candle burning in low light, casting soft shadows on a blank journal" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCGgo1p20tJwNh__RQ8IouLE9mHPF1nl-8-u_FWWOhnVTTNx6Ztt7TfJ3rFshUovA-Df5uSFuMKWBblTi73wcZXEZpdmIhmBeP4FEH2JNjBt0NNlSwWR4jP9B43KYFt3DDGjKfUJno2yqOnTAE3oM9cmbDFTWTkW5ewjsaxyYgJQfvgVeUFoRdZHn_o-9tpoebxb874kcsC-YDQ5o149Sg1s-GMsVumdo-y5sV9NEH5OlQx8wEUoy1vimRtqoy8JAzUSaq04XSgXrs"/>
+</div>
+<div class="w-full md:w-1/2 space-y-6">
+<div class="font-headline text-2xl font-bold text-primary">致远方的信</div>
+<p class="text-on-surface-variant font-body leading-relaxed text-lg">
+                                        有些话如果不写下来，可能就永远消失在了记忆的裂缝里。那些关于理想、遗憾和期待的碎碎念，在纸面上跳跃。
+                                    </p>
+<div class="flex items-center gap-6 font-label text-xs text-primary/40">
+<span class="flex items-center gap-2"><span class="material-symbols-outlined text-sm" data-icon="edit_note">edit_note</span> 1,240 Words</span>
+<span class="flex items-center gap-2"><span class="material-symbols-outlined text-sm" data-icon="mood">mood</span> Serene</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Pagination / Load More -->
+<div class="mt-32 flex flex-col items-center gap-8">
+<div class="h-20 w-[1px] bg-gradient-to-b from-primary/20 to-transparent"></div>
+<button class="font-headline text-lg text-primary/60 hover:text-primary transition-all group flex items-center gap-3">
+                追溯更久远的记忆
+                <span class="material-symbols-outlined group-hover:translate-y-1 transition-transform" data-icon="expand_more">expand_more</span>
+</button>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-md z-50 flex justify-around items-center py-3 px-4 bg-[#ffffff]/90 dark:bg-stone-950/90 backdrop-blur-lg rounded-full shadow-[0_20_40px_rgba(105,93,74,0.06)] md:hidden">
+<a class="flex flex-col items-center justify-center text-[#695d4a] dark:text-[#f4f4f0] scale-110" href="#">
+<span class="material-symbols-outlined" data-icon="auto_stories" style="font-variation-settings: 'FILL' 1;">auto_stories</span>
+<span class="font-manrope text-[10px] uppercase tracking-widest mt-1">书卷</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#695d4a]/40 dark:text-[#f4f4f0]/40 hover:text-[#695d4a] transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="star">star</span>
+<span class="font-manrope text-[10px] uppercase tracking-widest mt-1">收藏</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#695d4a]/40 dark:text-[#f4f4f0]/40 hover:text-[#695d4a] transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="edit_note">edit_note</span>
+<span class="font-manrope text-[10px] uppercase tracking-widest mt-1">撰写</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#695d4a]/40 dark:text-[#f4f4f0]/40 hover:text-[#695d4a] transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="tune">tune</span>
+<span class="font-manrope text-[10px] uppercase tracking-widest mt-1">设置</span>
+</a>
+</nav>
+<!-- Contextual FAB (Hidden for Archive Page as per rules) -->
+<!-- Suppression logic: Archive is a secondary explore screen, FAB should be on Home/撰写 -->
+</body></html>

@@ -1,0 +1,12 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "provider": {
+    "anthropic": {
+      "options": {
+        "baseURL": "https://ktbjmklihfff.us-west-1.clawcloudrun.com/v1",
+        "apiKey": "sk-a3MpNyVyjgo1SOLaUFsGEWp1i4hA7KU8pIEuIzGifMQ4TVlC"
+      }
+    }
+  },
+  "model": "anthropic/claude-opus-4-6"
+}

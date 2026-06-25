@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>氛围日记 - 收藏</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&amp;family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&amp;family=Manrope:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                "primary": "#695d4a",
+                "on-secondary-container": "#515250",
+                "inverse-surface": "#0d0f0d",
+                "surface-container-high": "#e6e9e4",
+                "on-surface-variant": "#5c605c",
+                "on-surface": "#2f3430",
+                "on-secondary-fixed-variant": "#5b5c5a",
+                "surface-tint": "#695d4a",
+                "secondary-container": "#e3e2e0",
+                "surface-container-highest": "#e0e4de",
+                "surface-bright": "#faf9f6",
+                "on-primary-fixed": "#493e2d",
+                "surface-container-lowest": "#ffffff",
+                "secondary": "#5e5f5d",
+                "on-error-container": "#742410",
+                "error-dim": "#5c1202",
+                "on-background": "#2f3430",
+                "on-tertiary-container": "#5a5f3c",
+                "surface-container-low": "#f4f4f0",
+                "surface": "#faf9f6",
+                "on-error": "#fff7f6",
+                "inverse-primary": "#fdebd3",
+                "surface-variant": "#e0e4de",
+                "on-secondary-fixed": "#3e403e",
+                "on-primary-container": "#5c503e",
+                "inverse-on-surface": "#9d9d9a",
+                "tertiary-fixed": "#f2f7ca",
+                "outline-variant": "#afb3ae",
+                "tertiary-container": "#f2f7ca",
+                "secondary-fixed-dim": "#d5d4d2",
+                "secondary-dim": "#525351",
+                "on-tertiary": "#f8fdcf",
+                "tertiary-fixed-dim": "#e4e9bc",
+                "error-container": "#fe8b70",
+                "on-secondary": "#faf9f6",
+                "error": "#9e422c",
+                "on-primary-fixed-variant": "#665a47",
+                "tertiary": "#5d623f",
+                "on-primary": "#fff6ee",
+                "primary-container": "#f2e0c8",
+                "surface-container": "#edeeea",
+                "outline": "#777c77",
+                "tertiary-dim": "#515634",
+                "background": "#faf9f6",
+                "secondary-fixed": "#e3e2e0",
+                "primary-fixed-dim": "#e3d2bb",
+                "surface-dim": "#d6dbd5",
+                "on-tertiary-fixed-variant": "#646945",
+                "on-tertiary-fixed": "#474c2b",
+                "primary-dim": "#5d513f",
+                "primary-fixed": "#f2e0c8"
+            },
+            "borderRadius": {
+                "DEFAULT": "0.125rem",
+                "lg": "0.25rem",
+                "xl": "0.5rem",
+                "full": "0.75rem"
+            },
+            "fontFamily": {
+                "headline": ["Noto Serif SC", "serif"],
+                "body": ["Newsreader", "serif"],
+                "label": ["Manrope", "sans-serif"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            font-family: 'Newsreader', serif;
+            background-color: #faf9f6;
+            color: #2f3430;
+        }
+        .font-noto-serif { font-family: 'Noto Serif SC', serif; }
+        .font-manrope { font-family: 'Manrope', sans-serif; }
+        .glass-header {
+            background: rgba(250, 249, 246, 0.85);
+            backdrop-filter: blur(20px);
+        }
+        .masonry-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            grid-auto-rows: 10px;
+            gap: 1.5rem;
+        }
+        .masonry-item {
+            grid-row-end: span 30; /* Default */
+        }
+        .masonry-item-short { grid-row-end: span 22; }
+        .masonry-item-tall { grid-row-end: span 42; }
+    </style>
+</head>
+<body class="bg-background">
+<!-- TopNavBar -->
+<nav class="bg-[#faf9f6]/85 dark:bg-stone-900/85 backdrop-blur-xl text-[#695d4a] dark:text-[#d1c7b7] font-noto-serif tracking-tight docked full-width top-0 sticky z-50 flex justify-between items-center w-full px-6 py-4">
+<div class="text-xl font-bold text-[#695d4a] dark:text-[#d1c7b7]">氛围日记</div>
+<div class="hidden md:flex items-center gap-8">
+<a class="text-[#695d4a]/60 dark:text-[#f4f4f0]/60 hover:text-[#5d513f] transition-colors duration-300" href="#">书卷</a>
+<a class="text-[#695d4a] dark:text-[#f4f4f0] font-bold hover:text-[#5d513f] transition-colors duration-300" href="#">收藏</a>
+<a class="text-[#695d4a]/60 dark:text-[#f4f4f0]/60 hover:text-[#5d513f] transition-colors duration-300" href="#">撰写</a>
+<a class="text-[#695d4a]/60 dark:text-[#f4f4f0]/60 hover:text-[#5d513f] transition-colors duration-300" href="#">设置</a>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined cursor-pointer hover:scale-95 transition-transform" data-icon="filter_list">filter_list</span>
+<span class="material-symbols-outlined cursor-pointer hover:scale-95 transition-transform" data-icon="settings">settings</span>
+</div>
+</nav>
+<main class="max-w-7xl mx-auto px-6 pt-12 pb-32">
+<!-- Header Section -->
+<header class="mb-16">
+<h1 class="text-5xl font-headline font-bold text-primary mb-4 tracking-tight">灵感撷萃</h1>
+<p class="text-secondary font-body italic text-lg opacity-80">珍藏那些触动心弦的瞬间，即便光阴流转，余温尚存。</p>
+</header>
+<!-- Asymmetric Layout / Masonry -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-start">
+<!-- Entry 1: Quote focus -->
+<div class="flex flex-col gap-4 group">
+<div class="bg-surface-container-low rounded-xl p-8 hover:bg-surface-container-highest transition-all duration-500">
+<div class="flex justify-between items-start mb-8">
+<span class="font-manrope text-[10px] uppercase tracking-[0.2em] text-outline">2023 / 11 / 02</span>
+<span class="material-symbols-outlined text-primary" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+<blockquote class="font-headline text-2xl leading-relaxed text-on-surface mb-6">
+                        “这里的阳光有一种陈旧的香气，像是翻开了一本很久没读的旧书。”
+                    </blockquote>
+<div class="flex items-center gap-3">
+<div class="h-[1px] w-8 bg-outline-variant/30"></div>
+<span class="font-manrope text-xs text-secondary">《午后书屋》</span>
+</div>
+</div>
+</div>
+<!-- Entry 2: Image focus -->
+<div class="flex flex-col gap-4 group">
+<div class="bg-surface-container-lowest rounded-xl overflow-hidden shadow-[0_20px_40px_rgba(105,93,74,0.03)] hover:shadow-[0_20px_40px_rgba(105,93,74,0.08)] transition-all duration-700">
+<div class="relative h-80 overflow-hidden">
+<img alt="Soft light entering through a wooden window with dust motes dancing in the air" class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" data-alt="close-up of warm sunlight streaming through a traditional wooden lattice window onto an antique desk with soft dust motes" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD6gxl3rHNUZg3Lk25xRkgVvwbgT5DEk6LT5UX0qgxhcRdXeV7z1U7XZNo_cOl2KRdNyh_D_Hkpi4M1xlJdLtk_w_48T-xAMQ7BbPXUDmIEyY-1U4YgTFPx7v-AuZnpdAGqLQZaGZTSaNc--XQaYypL8Ns-VutPJYqqxUOZRYi_1TS0D6nD33zct2LAgO-Xj2JU_O2zPW-dLWb2IBwllGrGnu_cIR5BajjkbX0Nkq-KtWVBYIQdN_8TlCXS2xoZKQw6wdQCnMurCx4"/>
+<div class="absolute top-4 right-4 bg-white/60 backdrop-blur-md rounded-full p-2">
+<span class="material-symbols-outlined text-primary text-sm" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+</div>
+<div class="p-6">
+<div class="font-manrope text-[10px] uppercase tracking-[0.2em] text-outline mb-3">2023 / 10 / 28</div>
+<h3 class="font-headline text-lg font-bold text-on-surface mb-2">窗外的浮光</h3>
+<p class="font-body text-secondary leading-relaxed">这一刻，时间仿佛停滞了。我看着光斑在墙上缓慢移动，思考着关于存在的意义。</p>
+</div>
+</div>
+</div>
+<!-- Entry 3: Vertical Text Detail -->
+<div class="flex flex-col gap-4">
+<div class="bg-surface-container-low rounded-xl p-8 relative min-h-[400px] flex flex-row-reverse justify-between hover:bg-surface-container-highest transition-all duration-500">
+<div class="writing-mode-vertical-rl font-headline text-3xl tracking-[0.3em] leading-loose text-primary/80 pt-8" style="writing-mode: vertical-rl;">
+                        静谧之森
+                    </div>
+<div class="flex flex-col justify-between h-full">
+<span class="material-symbols-outlined text-primary" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<div class="space-y-4">
+<span class="font-manrope text-[10px] uppercase tracking-[0.2em] text-outline block">2023 / 12 / 15</span>
+<p class="font-body text-secondary max-w-[120px]">大雨过后的山林，充满了泥土与雪松的味道。呼吸变得如此轻盈。</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Entry 4: Featured Story -->
+<div class="md:col-span-2 bg-primary-container rounded-xl overflow-hidden flex flex-col md:flex-row shadow-[0_20px_40px_rgba(105,93,74,0.06)] hover:bg-primary-container/80 transition-all duration-500">
+<div class="md:w-1/2 h-64 md:h-auto">
+<img alt="An open ceramic cup of tea with steam rising on a linen cloth" class="w-full h-full object-cover" data-alt="minimalist overhead shot of a steaming ceramic tea cup on a rustic linen cloth with scattered dried tea leaves" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAx_YknSxDGuzF0tw6U-Wzyx7D6j_twI-8CnkRkcipmW1EG2QaqSI-Epf16T9a1U2gD0GNFgb-N8BhIvyT4WGRVkcubQx7QILvKiBPMMjC9e5inQOuzqDk0zlhPNzBrmKqdD22LakDTDt_R4JeC9O_6GH3rkvK-MrQoOzp12e4cfiicdIovDC5VSXjHnntlp5UTPGMfAl6RWuid8c0g4lMWwicw9_fFP54zO9lm9cZe6Sfpjv9qhtcrdTNJV66iwrmMWjKi-Yg0rY4"/>
+</div>
+<div class="p-10 md:w-1/2 flex flex-col justify-center">
+<div class="flex items-center gap-2 mb-6">
+<span class="material-symbols-outlined text-primary text-sm" data-icon="auto_stories">auto_stories</span>
+<span class="font-manrope text-[10px] uppercase tracking-[0.2em] text-primary/60">年度精选</span>
+</div>
+<h2 class="font-headline text-3xl font-bold text-on-primary-container mb-4 leading-tight">在京都的那个雨后，我遇见了自己。</h2>
+<p class="font-body text-on-primary-container/80 text-lg mb-8 italic">“生活不只是生存，更是在每一个微小的瞬间里，找到灵魂的归处。”</p>
+<div class="flex justify-between items-center">
+<span class="font-manrope text-[10px] uppercase tracking-[0.2em] text-on-primary-container/40">2023 / 09 / 12</span>
+<span class="material-symbols-outlined text-primary" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+</div>
+</div>
+<!-- Entry 5: Minimalist Card -->
+<div class="bg-surface-container-low rounded-xl p-8 border-l-4 border-primary/20 hover:border-primary transition-all duration-500">
+<div class="flex justify-between items-start mb-6">
+<span class="font-manrope text-[10px] uppercase tracking-[0.2em] text-outline">2024 / 01 / 05</span>
+<span class="material-symbols-outlined text-primary" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+<p class="font-headline text-xl text-on-surface leading-relaxed italic">
+                    “有时候，沉默是比言语更动人的叙述。”
+                </p>
+<div class="mt-8 pt-6 border-t border-outline-variant/10">
+<span class="font-manrope text-xs text-secondary/60">分类: 冥想 / 夜读</span>
+</div>
+</div>
+</div>
+<!-- Pagination / Load More (Stylized) -->
+<div class="mt-24 flex flex-col items-center gap-6">
+<div class="w-24 h-[1px] bg-outline-variant/30"></div>
+<button class="font-manrope text-[10px] uppercase tracking-[0.3em] text-primary hover:tracking-[0.5em] transition-all duration-500 py-4 px-8 border border-outline-variant/20 rounded-full hover:bg-surface-container-high">
+                翻阅更多
+            </button>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-md z-50 flex justify-around items-center py-3 px-4 bg-[#ffffff]/90 dark:bg-stone-950/90 backdrop-blur-lg rounded-full shadow-[0_20_40px_rgba(105,93,74,0.06)]">
+<a class="flex flex-col items-center justify-center text-[#695d4a]/40 dark:text-[#f4f4f0]/40 hover:text-[#695d4a] transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="auto_stories">auto_stories</span>
+<span class="font-manrope text-[10px] uppercase tracking-widest mt-1">书卷</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#695d4a] dark:text-[#f4f4f0] scale-110" href="#">
+<span class="material-symbols-outlined" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-manrope text-[10px] uppercase tracking-widest mt-1">收藏</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#695d4a]/40 dark:text-[#f4f4f0]/40 hover:text-[#695d4a] transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="edit_note">edit_note</span>
+<span class="font-manrope text-[10px] uppercase tracking-widest mt-1">撰写</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#695d4a]/40 dark:text-[#f4f4f0]/40 hover:text-[#695d4a] transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="tune">tune</span>
+<span class="font-manrope text-[10px] uppercase tracking-widest mt-1">设置</span>
+</a>
+</nav>
+<!-- Floating Action Background Texture Element -->
+<div class="fixed top-0 left-0 w-full h-full pointer-events-none opacity-[0.03] z-[-1]" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDoG9BVBAXCrWcBmryw--SP8GdkZMNiSQkCTEtFOVimARtM3f31Zo0ENGtKdqET5_yaocbkIdW9GcCjapNJhU7BRf08NaNQvF341x6FzRXNXVzghOouGgWZvliseMU5QIgsnGwtdBQuO7nO6N0x7ud3RGrKlahr2vwIDT161fILKHzXZ2mJUMcLjRHpKQBN70CAYekYzYgtjaB1lHKiAOm7wlBa4CJUFiGeZaJmqM6FX3rjwkPn2Pfzu0sEYBYRDLNNG_MsEpNk3Xw');"></div>
+</body></html>

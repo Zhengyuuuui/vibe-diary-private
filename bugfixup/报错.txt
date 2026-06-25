@@ -1,0 +1,946 @@
+<script setup>
+import { ref, onMounted, onBeforeUnmount, nextTick, computed, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useDiaryStore } from '@/stores/diary'
+import { savePage, addPage } from '@/api'
+
+const route = useRoute()
+const router = useRouter()
+const store = useDiaryStore()
+const diaryId = route.params.id
+
+const flipContainer = ref(null)
+const pageFlipInstance = ref(null)
+const showPageFlip = ref(true)
+const isLoadingNewPage = ref(false)
+const currentPageIndex = ref(0)
+const saveTimers = ref({})
+const isFlipping = ref(false)
+const pageContents = ref({})
+
+const isEditMode = ref(false)
+const editingPageId = ref(null)
+const charLimit = 1000
+const saveStatus = ref('')
+const showSaveToast = ref(false)
+const isComposing = ref(false)
+const composingStartTime = ref(null)
+
+const coverStyles = {
+  leather: { class: 'leather-texture', textClass: 'text-on-primary' },
+  linen: { class: 'linen-texture bg-primary-container', textClass: 'text-primary' },
+  pattern: { class: 'pattern-texture', textClass: 'text-on-surface' }
+}
+
+const displayPages = computed(() => {
+  if (!store.currentDiary || !store.currentDiary.pages) return []
+  
+  const pages = [...store.currentDiary.pages]
+  
+  pages.push({
+    id: 'back-cover',
+    page_num: pages.length,
+    content: '',
+    isBackCover: true
+  })
+  
+  return pages
+})
+
+const totalPages = computed(() => {
+  if (!pageFlipInstance.value) return 0
+  return Math.max(0, pageFlipInstance.value.getPageCount() - 1)
+})
+
+const currentPageContent = computed(() => {
+  if (!editingPageId.value) return ''
+  return pageContents.value[editingPageId.value] || ''
+})
+
+const currentCharCount = computed(() => {
+  return currentPageContent.value.length
+})
+
+const isOverLimit = computed(() => {
+  return currentCharCount.value > charLimit
+})
+
+const isNearLimit = computed(() => {
+  return currentCharCount.value > charLimit * 0.9
+})
+
+const contentPageCount = computed(() => {
+  if (!store.currentDiary?.pages) return 0
+  return Math.max(0, store.currentDiary.pages.length - 1)
+})
+
+const currentContentPage = computed(() => {
+  if (currentPageIndex.value === 0) return 0
+  const lastPageIndex = pageFlipInstance.value?.getPageCount() - 1 || 0
+  if (currentPageIndex.value >= lastPageIndex) return 0
+  return currentPageIndex.value
+})
+
+const pageNavText = computed(() => {
+  if (currentContentPage.value === 0) {
+    return currentPageIndex.value === 0 ? '封面' : '封底'
+  }
+  return `${currentContentPage.value} / ${contentPageCount.value}`
+})
+
+function formatDateTime(dateStr) {
+  console.log('🕐 formatDateTime 被调用, 参数:', dateStr, '类型:', typeof dateStr);
+  
+  if (!dateStr) {
+    console.log('❌ dateStr 为空，返回空字符串');
+    return ''
+  }
+  
+  const date = new Date(dateStr)
+  if (isNaN(date.getTime())) {
+    console.log('❌ 无效日期:', dateStr);
+    return ''
+  }
+  
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  const hours = String(date.getHours()).padStart(2, '0')
+  const minutes = String(date.getMinutes()).padStart(2, '0')
+  const seconds = String(date.getSeconds()).padStart(2, '0')
+  
+  const result = `${year}/${month}/${day} ${hours}:${minutes}:${seconds}`
+  console.log('✅ 格式化结果:', result);
+  return result
+}
+
+onMounted(async () => {
+  console.log('🚀 DiaryReaderView onMounted 开始');
+  console.log('  - diaryId:', diaryId);
+  
+  await store.loadDiary(diaryId)
+  
+  console.log('📦 加载日记数据完成');
+  console.log('  - currentDiary:', store.currentDiary ? '存在' : '不存在');
+  
+  if (store.currentDiary) {
+    console.log('  - 页面数量:', store.currentDiary.pages?.length);
+    
+    if (store.currentDiary.pages && store.currentDiary.pages.length > 0) {
+      console.log('  - 第一页数据:', JSON.stringify(store.currentDiary.pages[0], null, 2));
+      console.log('  - 第一页是否有 updated_at:', 'updated_at' in store.currentDiary.pages[0]);
+      console.log('  - 第一页 updated_at 值:', store.currentDiary.pages[0].updated_at);
+    }
+    
+    store.currentDiary.pages.forEach(p => {
+      pageContents.value[String(p.id)] = p.content
+    })
+  }
+  await nextTick()
+  initPageFlip()
+})
+
+onBeforeUnmount(() => {
+  if (pageFlipInstance.value) {
+    pageFlipInstance.value.destroy()
+  }
+  Object.values(saveTimers.value).forEach(clearTimeout)
+})
+
+function initPageFlip() {
+  console.log('🔧 ========== initPageFlip 开始 ==========')
+  console.log('  - flipContainer.value:', flipContainer.value)
+  console.log('  - store.currentDiary:', store.currentDiary ? '存在' : '不存在')
+  
+  if (!flipContainer.value || !store.currentDiary) {
+    console.log('❌ 条件不满足，退出 initPageFlip')
+    return
+  }
+
+  const St = window.St
+  console.log('  - window.St:', St ? '存在' : '不存在')
+  console.log('  - window.St.PageFlip:', St?.PageFlip ? '存在' : '不存在')
+  
+  if (!St || !St.PageFlip) {
+    console.error('❌ StPageFlip 库加载失败，尝试降级模式')
+    return
+  }
+
+  const isMobile = window.innerWidth < 768
+  const pageWidth = isMobile ? Math.min(window.innerWidth - 40, 400) : 480
+  const pageHeight = Math.round(pageWidth * 4 / 3)
+  console.log('  - 设备类型:', isMobile ? '移动端' : '桌面端')
+  console.log('  - 页面尺寸:', pageWidth, 'x', pageHeight)
+
+  try {
+    console.log('📦 创建 PageFlip 实例')
+    const pf = new St.PageFlip(flipContainer.value, {
+      width: pageWidth,
+      height: pageHeight,
+      size: 'stretch',
+      minWidth: 280,
+      maxWidth: 600,
+      minHeight: 373,
+      maxHeight: 800,
+      drawShadow: true,
+      flippingTime: 800,
+      usePortrait: true,
+      startZIndex: 0,
+      autoSize: true,
+      maxShadowOpacity: 0.7,
+      showCover: true,
+      mobileScrollSupport: true,
+      clickEventForward: true,
+      useMouseEvents: true,
+      swipeDistance: 30,
+      showPageCorners: true,
+      disableFlipByClick: false
+    })
+    console.log('✅ PageFlip 实例创建成功')
+
+    console.log('📦 查询 .diary-page 元素')
+    const pages = flipContainer.value.querySelectorAll('.diary-page')
+    console.log('  - 找到的页面数量:', pages.length)
+    
+    if (pages.length === 0) {
+      console.error('❌ 没有找到任何 .diary-page 元素！')
+      return
+    }
+    
+    pages.forEach((page, idx) => {
+      console.log(`  - 页面 ${idx}:`, {
+        hasDataDensity: page.hasAttribute('data-density'),
+        density: page.getAttribute('data-density'),
+        className: page.className,
+        parentElement: page.parentElement?.className,
+        isConnected: page.isConnected
+      })
+    })
+    
+    console.log('📦 调用 loadFromHTML')
+    pf.loadFromHTML(pages)
+    console.log('✅ loadFromHTML 成功')
+
+    console.log('📦 注册事件监听器')
+    pf.on('flip', (e) => {
+      console.log('📄 flip 事件:', e.data)
+      currentPageIndex.value = e.data
+      isFlipping.value = true
+      setTimeout(() => { isFlipping.value = false }, 300)
+    })
+
+    pf.on('changeOrientation', () => {
+      console.log('🔄 changeOrientation 事件')
+      pf.update()
+    })
+
+    pageFlipInstance.value = pf
+    console.log('✅ pageFlipInstance 已保存')
+    console.log('  - 页面总数:', pf.getPageCount())
+    console.log('🔧 ========== initPageFlip 完成 ==========')
+  } catch (err) {
+    console.error('❌ StPageFlip 初始化失败:', err)
+    console.error('❌ 错误堆栈:', err.stack)
+    console.error('❌ 错误详情:', {
+      name: err.name,
+      message: err.message,
+      flipContainer: flipContainer.value,
+      pagesCount: flipContainer.value?.querySelectorAll('.diary-page').length
+    })
+  }
+}
+
+function handleCompositionStart() {
+  isComposing.value = true
+  composingStartTime.value = Date.now()
+}
+
+function handleCompositionEnd(event) {
+  isComposing.value = false
+  composingStartTime.value = null
+  
+  const pageId = editingPageId.value
+  if (pageId) {
+    const content = event.target.innerText || ''
+    const pageIdStr = String(pageId)
+    pageContents.value[pageIdStr] = content
+    
+    triggerAutoSave(pageIdStr, content)
+  }
+}
+
+function triggerAutoSave(pageIdStr, content) {
+  saveStatus.value = 'saving'
+  showSaveToast.value = true
+  
+  if (saveTimers.value[pageIdStr]) {
+    clearTimeout(saveTimers.value[pageIdStr])
+  }
+  
+  saveTimers.value[pageIdStr] = setTimeout(async () => {
+    try {
+      console.log('🚀 开始保存 - pageId:', pageIdStr, 'content:', content)
+      await savePage(pageIdStr, content)
+      saveStatus.value = 'saved'
+      
+      const pageIndex = store.currentDiary.pages.findIndex(p => String(p.id) === pageIdStr)
+      console.log('🔍 findIndex 结果:', pageIndex)
+      console.log('🔍 所有页面 ID:', store.currentDiary.pages.map(p => ({ id: p.id, type: typeof p.id })))
+      
+      if (pageIndex !== -1) {
+        store.currentDiary.pages[pageIndex].content = content
+        store.currentDiary.pages[pageIndex].updated_at = new Date().toISOString()
+        console.log('✅ 已更新 store.currentDiary.pages[' + pageIndex + '].content 和 updated_at')
+      } else {
+        console.log('❌ 未找到对应页面')
+      }
+      
+      delete saveTimers.value[pageIdStr]
+      
+      setTimeout(() => {
+        showSaveToast.value = false
+        saveStatus.value = ''
+      }, 3000)
+    } catch (err) {
+      console.error('自动保存失败:', err)
+      saveStatus.value = ''
+      delete saveTimers.value[pageIdStr]
+    }
+  }, 2000)
+}
+
+function handleInput(pageId, event) {
+  if (isComposing.value && composingStartTime.value) {
+    if (Date.now() - composingStartTime.value > 5000) {
+      console.warn('⚠️ isComposing 状态卡住，强制重置')
+      isComposing.value = false
+      composingStartTime.value = null
+    }
+  }
+  
+  if (isComposing.value) {
+    return
+  }
+  
+  const content = event.target.innerText || ''
+  
+  if (content.length > charLimit) {
+    event.target.innerText = content.substring(0, charLimit)
+    return
+  }
+  
+  const pageIdStr = String(pageId)
+  pageContents.value[pageIdStr] = content
+  console.log('💾 handleInput - pageId:', pageId, '类型:', typeof pageId, '-> pageIdStr:', pageIdStr)
+  console.log('💾 handleInput - content:', content)
+  
+  triggerAutoSave(pageIdStr, content)
+}
+
+async function addNewPage() {
+  if (!store.currentDiary) return
+  if (isLoadingNewPage.value) return
+  
+  isLoadingNewPage.value = true
+  
+  try {
+    if (pageFlipInstance.value) {
+      pageFlipInstance.value.destroy()
+      pageFlipInstance.value = null
+    }
+    
+    showPageFlip.value = false
+    
+    await nextTick()
+    
+    await addPage(diaryId)
+    await store.loadDiary(diaryId)
+    
+    const newPage = store.currentDiary.pages[store.currentDiary.pages.length - 1]
+    if (newPage) {
+      pageContents.value[String(newPage.id)] = newPage.content
+    }
+    
+    showPageFlip.value = true
+    
+    await nextTick()
+    
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        initPageFlip()
+        
+        requestAnimationFrame(() => {
+          if (pageFlipInstance.value) {
+            const pageCount = pageFlipInstance.value.getPageCount()
+            if (pageCount > 2) {
+              pageFlipInstance.value.flip(pageCount - 2)
+            }
+          }
+        })
+      })
+    })
+  } catch (err) {
+    console.error('添加页面失败:', err)
+  } finally {
+    isLoadingNewPage.value = false
+  }
+}
+
+function goBack() {
+  router.push('/')
+}
+
+function flipNext() {
+  if (pageFlipInstance.value && !isFlipping.value) {
+    const pageCount = pageFlipInstance.value.getPageCount()
+    if (currentPageIndex.value < pageCount - 2) {
+      pageFlipInstance.value.flipNext()
+    }
+  }
+}
+
+function flipPrev() {
+  if (pageFlipInstance.value && !isFlipping.value) {
+    pageFlipInstance.value.flipPrev()
+  }
+}
+
+function toggleToBrowseMode() {
+  if (hasUnsavedChanges()) {
+    const confirmed = confirm('有未保存的内容，是否保存？')
+    if (confirmed) {
+      saveAllChanges()
+    }
+  }
+  isEditMode.value = false
+  editingPageId.value = null
+  enablePageFlip()
+}
+
+function toggleToEditMode() {
+  isEditMode.value = true
+  disablePageFlip()
+  
+  const setEditAreaContent = () => {
+    const editAreas = document.querySelectorAll('[data-page-id]')
+    console.log('🔍 找到的编辑区域数量:', editAreas.length)
+    
+    editAreas.forEach(editArea => {
+      const pageId = editArea.getAttribute('data-page-id')
+      console.log('📄 处理页面 ID:', pageId, '类型:', typeof pageId)
+      
+      if (pageId) {
+        const page = store.currentDiary?.pages.find(p => p.id === pageId || p.id === Number(pageId) || String(p.id) === pageId)
+        console.log('📖 找到的页面:', page)
+        console.log('📝 pageContents.value[pageId]:', pageContents.value[pageId])
+        console.log('📝 page?.content:', page?.content)
+        
+        const content = pageContents.value[pageId] ?? page?.content ?? ''
+        console.log('✏️ 要设置的内容:', content)
+        console.log('📊 内容长度:', content.length)
+        console.log('🔄 当前 editArea.innerText:', editArea.innerText)
+        
+        if (content && editArea.innerText !== content) {
+          console.log('✅ 设置 innerText')
+          editArea.innerText = content
+        } else {
+          console.log('⚠️ 内容为空或相同，跳过设置')
+        }
+      }
+    })
+  }
+  
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      const editAreas = document.querySelectorAll('[data-page-id]')
+      console.log('🎯 双重 rAF 后找到的编辑区域:', editAreas.length)
+      
+      if (editAreas.length > 0) {
+        setEditAreaContent()
+      } else {
+        console.log('⏳ 使用 MutationObserver 等待 DOM...')
+        const observer = new MutationObserver(() => {
+          const editAreas = document.querySelectorAll('[data-page-id]')
+          if (editAreas.length > 0) {
+            console.log('✨ MutationObserver 检测到编辑区域')
+            observer.disconnect()
+            setEditAreaContent()
+          }
+        })
+        
+        observer.observe(document.body, {
+          childList: true,
+          subtree: true
+        })
+        
+        setTimeout(() => {
+          console.log('⏰ MutationObserver 超时')
+          observer.disconnect()
+        }, 1000)
+      }
+    })
+  })
+}
+
+function hasUnsavedChanges() {
+  if (!store.currentDiary) return false
+  
+  for (const page of store.currentDiary.pages) {
+    const pageIdStr = String(page.id)
+    const localContent = pageContents.value[pageIdStr] ?? pageContents.value[page.id] ?? ''
+    const storeContent = page.content ?? ''
+    console.log('🔍 hasUnsavedChanges - page.id:', page.id, '类型:', typeof page.id)
+    console.log('🔍 hasUnsavedChanges - localContent:', localContent)
+    console.log('🔍 hasUnsavedChanges - storeContent:', storeContent)
+    console.log('🔍 hasUnsavedChanges - 是否不同:', localContent !== storeContent)
+    if (localContent !== storeContent) {
+      return true
+    }
+  }
+  return false
+}
+
+async function saveAllChanges() {
+  for (const [pageId, content] of Object.entries(pageContents.value)) {
+    try {
+      await savePage(pageId, content)
+      delete saveTimers.value[pageId]
+      
+      const pageIndex = store.currentDiary.pages.findIndex(p => String(p.id) === pageId)
+      if (pageIndex !== -1) {
+        store.currentDiary.pages[pageIndex].content = content
+      }
+    } catch (err) {
+      console.error('保存失败:', err)
+    }
+  }
+}
+
+function disablePageFlip() {
+  if (pageFlipInstance.value) {
+    const ui = pageFlipInstance.value.getUI()
+    if (ui && typeof ui.removeHandlers === 'function') {
+      ui.removeHandlers()
+    }
+  }
+}
+
+function enablePageFlip() {
+  if (pageFlipInstance.value) {
+    const ui = pageFlipInstance.value.getUI()
+    if (ui && typeof ui.setHandlers === 'function') {
+      ui.setHandlers()
+    }
+  }
+}
+
+function handlePageDoubleClick(pageId) {
+  if (!isEditMode.value) {
+    toggleToEditMode()
+    editingPageId.value = pageId
+    
+    nextTick(() => {
+      const editArea = document.querySelector(`[data-page-id="${pageId}"]`)
+      if (editArea) {
+        const pageIdStr = String(pageId)
+        editArea.innerText = pageContents.value[pageIdStr] ?? store.currentDiary.pages.find(p => String(p.id) === pageIdStr)?.content ?? ''
+        editArea.focus()
+      }
+    })
+  }
+}
+
+watch(isEditMode, (newMode) => {
+  if (newMode) {
+    disablePageFlip()
+  } else {
+    enablePageFlip()
+    editingPageId.value = null
+  }
+})
+</script>
+
+<template>
+  <div class="min-h-screen bg-background flex flex-col">
+    <header class="bg-transparent backdrop-blur-xl sticky top-0 z-50">
+      <div class="flex justify-between items-center w-full px-6 py-4 max-w-4xl mx-auto">
+        <button @click="goBack" class="flex items-center space-x-2 text-on-surface-variant hover:text-on-surface transition-colors">
+          <span class="material-symbols-outlined">arrow_back</span>
+          <span class="font-label text-xs hidden md:inline">书架</span>
+        </button>
+        <div class="font-headline text-lg text-on-surface tracking-tight hidden md:block">
+          {{ store.currentDiary?.title || '加载中...' }}
+        </div>
+        <div class="flex items-center space-x-3">
+          <div class="flex items-center bg-surface-container rounded-lg p-1">
+            <button
+              @click="toggleToBrowseMode"
+              :class="[
+                'flex items-center space-x-1 px-3 py-1.5 rounded-md font-label text-xs transition-all',
+                !isEditMode
+                  ? 'bg-primary text-on-primary shadow-sm'
+                  : 'text-on-surface-variant hover:text-on-surface'
+              ]"
+            >
+              <span class="material-symbols-outlined text-sm">visibility</span>
+              <span>浏览</span>
+            </button>
+            <button
+              @click="toggleToEditMode"
+              :class="[
+                'flex items-center space-x-1 px-3 py-1.5 rounded-md font-label text-xs transition-all',
+                isEditMode
+                  ? 'bg-primary text-on-primary shadow-sm'
+                  : 'text-on-surface-variant hover:text-on-surface'
+              ]"
+            >
+              <span class="material-symbols-outlined text-sm">edit</span>
+              <span>编辑</span>
+            </button>
+          </div>
+          
+          <button 
+            @click="addNewPage" 
+            :disabled="isLoadingNewPage"
+            class="hidden md:flex items-center space-x-1 text-on-surface-variant hover:text-on-surface transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <span class="material-symbols-outlined" :class="{ 'animate-spin': isLoadingNewPage }">note_add</span>
+            <span class="font-label text-xs">{{ isLoadingNewPage ? '添加中...' : '新页' }}</span>
+          </button>
+          
+          <button 
+            @click="addNewPage" 
+            :disabled="isLoadingNewPage"
+            class="md:hidden p-2 text-on-surface-variant hover:text-on-surface transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <span class="material-symbols-outlined" :class="{ 'animate-spin': isLoadingNewPage }">note_add</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="flex-1 flex flex-col items-center justify-center py-8 px-4">
+      <div v-if="!store.currentDiary" class="text-center">
+        <span class="material-symbols-outlined animate-spin text-4xl text-primary">refresh</span>
+        <p class="mt-4 font-label text-sm text-on-surface-variant">正在翻开日记本...</p>
+      </div>
+
+      <template v-else>
+        <div class="md:hidden w-full max-w-md mb-4 px-4">
+          <div class="flex items-center justify-center bg-surface-container rounded-lg py-2">
+            <div class="flex-1 h-px bg-on-surface-variant/20"></div>
+            <h1 class="font-headline text-base text-on-surface tracking-wide px-4">
+              {{ store.currentDiary.title }}
+            </h1>
+            <div class="flex-1 h-px bg-on-surface-variant/20"></div>
+          </div>
+        </div>
+
+        <div class="page-flip-container w-full flex justify-center">
+        <div v-if="showPageFlip" ref="flipContainer" :key="displayPages.length" class="mx-auto">
+          <div
+            v-for="(page, index) in displayPages"
+            :key="page.id"
+            class="diary-page"
+            :data-density="(index === 0 || page.isBackCover) ? 'hard' : 'soft'"
+          >
+            <div
+              v-if="index === 0"
+              :class="[
+                coverStyles[store.currentDiary.cover_style]?.class || 'leather-texture',
+                'w-full h-full flex flex-col items-center justify-center relative overflow-hidden rounded-sm'
+              ]"
+            >
+              <div class="absolute inset-0 book-spine-shadow pointer-events-none"></div>
+              <div
+                :class="[
+                  'font-headline text-2xl tracking-widest mb-4 relative z-10',
+                  coverStyles[store.currentDiary.cover_style]?.textClass || 'text-on-primary'
+                ]"
+              >
+                {{ store.currentDiary.title }}
+              </div>
+              <div
+                :class="[
+                  'font-label text-xs relative z-10',
+                  coverStyles[store.currentDiary.cover_style]?.textClass || 'text-on-primary'
+                ]"
+                style="opacity: 0.6"
+              >
+                {{ store.currentDiary.created_at?.substring(0, 10) }}
+              </div>
+              <div class="absolute bottom-8 flex items-center space-x-2 opacity-40 z-10">
+                <span
+                  :class="[
+                    'material-symbols-outlined text-sm',
+                    coverStyles[store.currentDiary.cover_style]?.textClass || 'text-on-primary'
+                  ]"
+                >
+                  auto_stories
+                </span>
+              </div>
+            </div>
+
+            <div
+              v-else-if="page.isBackCover"
+              :class="[
+                coverStyles[store.currentDiary.cover_style]?.class || 'leather-texture',
+                'w-full h-full flex flex-col items-center justify-center relative overflow-hidden rounded-sm'
+              ]"
+            >
+              <div class="absolute inset-0 book-spine-shadow pointer-events-none"></div>
+              
+              <div class="relative z-10 flex flex-col items-center justify-center">
+                <span
+                  :class="[
+                    'material-symbols-outlined text-4xl mb-4',
+                    coverStyles[store.currentDiary.cover_style]?.textClass || 'text-on-primary'
+                  ]"
+                  style="opacity: 0.4"
+                >
+                  auto_stories
+                </span>
+                <div
+                  :class="[
+                    'font-label text-xs tracking-widest',
+                    coverStyles[store.currentDiary.cover_style]?.textClass || 'text-on-primary'
+                  ]"
+                  style="opacity: 0.5"
+                >
+                  氛围日记
+                </div>
+                <div
+                  :class="[
+                    'font-label text-[10px] mt-2',
+                    coverStyles[store.currentDiary.cover_style]?.textClass || 'text-on-primary'
+                  ]"
+                  style="opacity: 0.3"
+                >
+                  {{ store.currentDiary.created_at?.substring(0, 10) }}
+                </div>
+              </div>
+              
+              <div class="absolute bottom-8 flex items-center space-x-2 opacity-30 z-10">
+                <span
+                  :class="[
+                    'material-symbols-outlined text-sm',
+                    coverStyles[store.currentDiary.cover_style]?.textClass || 'text-on-primary'
+                  ]"
+                >
+                  bookmark
+                </span>
+              </div>
+            </div>
+
+            <div
+              v-else
+              class="w-full h-full bg-surface relative overflow-hidden transition-all duration-300"
+              :class="[
+                index % 2 === 0 ? 'page-shadow-left-enhanced' : 'page-shadow-right-enhanced',
+                isEditMode && editingPageId === page.id ? 'editing-page' : ''
+              ]"
+              @dblclick="handlePageDoubleClick(page.id)"
+            >
+              <div class="absolute inset-0 grid-paper opacity-50"></div>
+              <div class="absolute inset-0 linen-texture opacity-10"></div>
+              <div class="absolute left-0 top-0 bottom-0 w-6 book-spine-overlay pointer-events-none" v-if="index % 2 === 0"></div>
+              <div class="absolute right-0 top-0 bottom-0 w-6 book-spine-overlay-right pointer-events-none" v-else></div>
+              <div class="relative z-10 p-8 h-full flex flex-col">
+                <div class="font-label text-[10px] text-on-surface-variant mb-4 tracking-widest">
+                  <template v-if="index === 0">
+                    {{ store.currentDiary.title }} · 封面
+                  </template>
+                  <template v-else-if="page.isBackCover">
+                    {{ store.currentDiary.title }} · 封底
+                  </template>
+                  <template v-else>
+                    {{ store.currentDiary.title }} · 第 {{ index }} 页
+                  </template>
+                </div>
+                
+                <div
+                  v-if="isEditMode"
+                  :data-page-id="page.id"
+                  contenteditable="true"
+                  class="flex-1 font-body text-on-surface text-sm leading-relaxed outline-none whitespace-pre-wrap break-words overflow-y-auto"
+                  :class="{ 'pointer-events-none': isFlipping }"
+                  @input="handleInput(page.id, $event)"
+                  @compositionstart="handleCompositionStart"
+                  @compositionend="handleCompositionEnd"
+                  @focus="editingPageId = page.id"
+                  @click="editingPageId = page.id"
+                ></div>
+                
+                <div
+                  v-else
+                  class="flex-1 font-body text-on-surface text-sm leading-relaxed whitespace-pre-wrap break-words overflow-y-auto"
+                >{{ page.content || '（空白页）' }}</div>
+                
+                <div class="flex items-center justify-between mt-4 pt-2 border-t border-outline/30">
+                  <template v-if="index === 0">
+                    <span class="font-label text-[10px] text-on-surface-variant/50">封面</span>
+                  </template>
+                  <template v-else-if="page.isBackCover">
+                    <span class="font-label text-[10px] text-on-surface-variant/50">封底</span>
+                  </template>
+                  <template v-else>
+                    <span class="font-label text-[10px] text-on-surface-variant/50">{{ index }}</span>
+                  </template>
+                  
+                  <span 
+                    v-if="!page.isBackCover && index !== 0 && page.updated_at"
+                    class="font-label text-[10px] text-on-surface-variant/50"
+                  >
+                    {{ formatDateTime(page.updated_at) }}
+                  </span>
+                  
+                  <span 
+                    v-if="isEditMode && editingPageId === page.id"
+                    class="font-label text-[10px]"
+                    :class="[
+                      isOverLimit ? 'text-error' : isNearLimit ? 'text-warning' : 'text-on-surface-variant/50'
+                    ]"
+                  >
+                    {{ currentCharCount }} / {{ charLimit }}
+                  </span>
+                  <span v-else class="font-label text-[10px] text-on-surface-variant/50">氛围日记</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      </template>
+    </main>
+
+    <footer class="py-4 flex items-center justify-center space-x-8">
+      <button
+        @click="flipPrev"
+        class="p-3 rounded-full hover:bg-surface-container/50 transition-all text-on-surface-variant hover:text-on-surface"
+      >
+        <span class="material-symbols-outlined">chevron_left</span>
+      </button>
+      <span class="font-label text-xs text-on-surface-variant">
+        {{ pageNavText }}
+      </span>
+      <button
+        @click="flipNext"
+        class="p-3 rounded-full hover:bg-surface-container/50 transition-all text-on-surface-variant hover:text-on-surface"
+      >
+        <span class="material-symbols-outlined">chevron_right</span>
+      </button>
+    </footer>
+
+    <Transition name="toast">
+      <div 
+        v-if="showSaveToast"
+        class="fixed bottom-24 left-1/2 transform -translate-x-1/2 z-50"
+      >
+        <div class="bg-surface-container-high px-6 py-3 rounded-full shadow-lg flex items-center space-x-2">
+          <span 
+            v-if="saveStatus === 'saving'"
+            class="material-symbols-outlined text-primary animate-spin text-sm"
+          >
+            refresh
+          </span>
+          <span 
+            v-else-if="saveStatus === 'saved'"
+            class="material-symbols-outlined text-primary text-sm"
+          >
+            check_circle
+          </span>
+          <span class="font-label text-xs text-on-surface">
+            {{ saveStatus === 'saving' ? '自动保存中...' : '已保存' }}
+          </span>
+        </div>
+      </div>
+    </Transition>
+  </div>
+</template>
+
+<style scoped>
+.book-spine-shadow {
+  background: linear-gradient(
+    to right,
+    rgba(105, 93, 74, 0.25) 0%,
+    rgba(105, 93, 74, 0.15) 8%,
+    rgba(105, 93, 74, 0.05) 15%,
+    transparent 25%,
+    transparent 75%,
+    rgba(105, 93, 74, 0.05) 85%,
+    rgba(105, 93, 74, 0.15) 92%,
+    rgba(105, 93, 74, 0.25) 100%
+  );
+}
+
+.page-shadow-left-enhanced {
+  box-shadow: 
+    inset -30px 0 40px -15px rgba(105, 93, 74, 0.18),
+    inset -8px 0 15px -5px rgba(105, 93, 74, 0.12);
+}
+
+.page-shadow-right-enhanced {
+  box-shadow: 
+    inset 30px 0 40px -15px rgba(105, 93, 74, 0.18),
+    inset 8px 0 15px -5px rgba(105, 93, 74, 0.12);
+}
+
+.book-spine-overlay {
+  background: linear-gradient(
+    to right,
+    rgba(105, 93, 74, 0.12) 0%,
+    rgba(105, 93, 74, 0.06) 40%,
+    transparent 100%
+  );
+}
+
+.book-spine-overlay-right {
+  background: linear-gradient(
+    to left,
+    rgba(105, 93, 74, 0.12) 0%,
+    rgba(105, 93, 74, 0.06) 40%,
+    transparent 100%
+  );
+}
+
+.page-flip-container :deep(.stf__item) {
+  box-shadow: 0 25px 50px -12px rgba(105, 93, 74, 0.25);
+}
+
+.page-flip-container :deep(.stf__block) {
+  box-shadow: 
+    0 0 30px rgba(105, 93, 74, 0.1),
+    0 15px 35px -10px rgba(105, 93, 74, 0.2);
+}
+
+.editing-page {
+  border: 2px solid var(--color-primary);
+  box-shadow: 0 0 20px rgba(105, 93, 74, 0.3);
+  background: rgba(105, 93, 74, 0.02);
+  transition: all 0.3s ease;
+}
+
+.editing-page::before {
+  content: '编辑中';
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 10px;
+  color: var(--color-primary);
+  opacity: 0.6;
+  z-index: 20;
+  pointer-events: none;
+  font-family: var(--font-label);
+}
+
+.toast-enter-active,
+.toast-leave-active {
+  transition: all 0.3s ease;
+}
+
+.toast-enter-from,
+.toast-leave-to {
+  opacity: 0;
+  transform: translate(-50%, 20px);
+}
+</style>

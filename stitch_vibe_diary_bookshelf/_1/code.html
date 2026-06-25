@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&amp;family=Newsreader:ital,wght@0,400;0,600;1,400&amp;family=Manrope:wght@400;600;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary": "#695d4a",
+                        "on-secondary-container": "#515250",
+                        "inverse-surface": "#0d0f0d",
+                        "surface-container-high": "#e6e9e4",
+                        "on-surface-variant": "#5c605c",
+                        "on-surface": "#2f3430",
+                        "on-secondary-fixed-variant": "#5b5c5a",
+                        "surface-tint": "#695d4a",
+                        "secondary-container": "#e3e2e0",
+                        "surface-container-highest": "#e0e4de",
+                        "surface-bright": "#faf9f6",
+                        "on-primary-fixed": "#493e2d",
+                        "surface-container-lowest": "#ffffff",
+                        "secondary": "#5e5f5d",
+                        "on-error-container": "#742410",
+                        "error-dim": "#5c1202",
+                        "on-background": "#2f3430",
+                        "on-tertiary-container": "#5a5f3c",
+                        "surface-container-low": "#f4f4f0",
+                        "surface": "#faf9f6",
+                        "on-error": "#fff7f6",
+                        "inverse-primary": "#fdebd3",
+                        "surface-variant": "#e0e4de",
+                        "on-secondary-fixed": "#3e403e",
+                        "on-primary-container": "#5c503e",
+                        "inverse-on-surface": "#9d9d9a",
+                        "tertiary-fixed": "#f2f7ca",
+                        "outline-variant": "#afb3ae",
+                        "tertiary-container": "#f2f7ca",
+                        "secondary-fixed-dim": "#d5d4d2",
+                        "secondary-dim": "#525351",
+                        "on-tertiary": "#f8fdcf",
+                        "tertiary-fixed-dim": "#e4e9bc",
+                        "error-container": "#fe8b70",
+                        "on-secondary": "#faf9f6",
+                        "error": "#9e422c",
+                        "on-primary-fixed-variant": "#665a47",
+                        "tertiary": "#5d623f",
+                        "on-primary": "#fff6ee",
+                        "primary-container": "#f2e0c8",
+                        "surface-container": "#edeeea",
+                        "outline": "#777c77",
+                        "tertiary-dim": "#515634",
+                        "background": "#faf9f6",
+                        "secondary-fixed": "#e3e2e0",
+                        "primary-fixed-dim": "#e3d2bb",
+                        "surface-dim": "#d6dbd5",
+                        "on-tertiary-fixed-variant": "#646945",
+                        "on-tertiary-fixed": "#474c2b",
+                        "primary-dim": "#5d513f",
+                        "primary-fixed": "#f2e0c8"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Noto Serif SC", "serif"],
+                        "body": ["Newsreader", "serif"],
+                        "label": ["Manrope", "sans-serif"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>.material-symbols-outlined {
+    font-variation-settings: "FILL" 0, "wght" 300, "GRAD" 0, "opsz" 24
+    }
+body {
+    background-color: #faf9f6;
+    color: #2f3430
+    }
+.vertical-text {
+    writing-mode: vertical-rl;
+    text-orientation: mixed
+    }
+.shelf-shadow {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05), inset 0 -4px 6px rgba(0, 0, 0, 0.05)
+    }
+.book-spine {
+    writing-mode: vertical-rl;
+    text-orientation: mixed
+    }
+.linen-texture {
+    background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuDBmdG_1afLBz80mRDdSXoP4Fttugr6K2km3JJVpTleuGakOLhTkIl1B_dNoZJwoj7mfNJvXPhKm2oaLOO6wQDbX3XoqD7zrue9zFuaa2rlrj6t6rCfABmRH69RLgar02DKC6CpJ7zncr8rC9yXEZhmGxoGapRSs9mMFclNIjQEadmgOLbjNUXZOPurVh-ovibOF90H97QDOaN1vWVBYfVDba8cEaCX5gyHtqAm72ElW-BMOwMFOicZuJs88xr4EGG2W2hsiV16TRE)
+    }
+.leather-texture {
+    background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuC442z2hMo-Q6x2Q6ghmTyLPPlgovbXznHEgBnWAtttqkvtkwI4xgEBR-NPGJtEJX3J6A_uEkDPO7T7yEY2ThI5mVDyTELM5TKWfJnPdT26Nl4T_tojGsF0A0LBlSqWbGePzpmk4zyVERwXQ2B0tTKbelm6w1q75Qx31h62mhHZCQOOLzitvvMk7w6HEHSbnuwe8r-VgrzcOX9wmfgUn8FzPQOKksEBpVqaT0K1pMQ0bjkrKDVu_Fnk6hsHCLq_Jm12aH5FSTphXGk)
+    }
+.paper-texture {
+    background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuBG8ub9y06znPOA9hJ9qWG5ZtoW17sEAIXYNLN9hNBd7C1uVKW3gkCIp3jWtcfIKdWM5klO9AH-oG2mOnE1MEdoOi3AtK991SIrVMoIEsqQyd6ni7B4ERm_du4Mr6tsMt1lyotDexLihvMAn3PRSVD0M3ziQanWiFEyRdlAjvj9p2rcOAuoi4nV9fM8gtkZSG3kbb-PadKuX8-EgLjdpReiOq-M5Duf6jakpevmCilY2kPfZ23nvzI6bV2CdzbU3cvqB3qPo2hGWA0)
+    }
+.book-shadow {
+    box-shadow: 5px 0 15px rgba(0, 0, 0, 0.2), inset 1px 0 1px rgba(255, 255, 255, 0.1)
+    }
+.shelf-lighting {
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.05) 80%, rgba(0, 0, 0, 0.15) 100%)
+    }</style>
+</head>
+<body class="font-body selection:bg-primary-container selection:text-on-primary-container min-h-screen flex flex-col">
+<!-- TopNavBar -->
+<header class="bg-[#faf9f6]/85 dark:bg-stone-900/85 backdrop-blur-xl docked full-width top-0 sticky z-50 flex justify-between items-center w-full px-6 py-4">
+<div class="flex items-center gap-4">
+<span class="text-xl font-bold text-[#695d4a] dark:text-[#d1c7b7] font-headline tracking-tight">氛围日记</span>
+</div>
+<div class="hidden md:flex items-center gap-8">
+<a class="text-[#695d4a] dark:text-[#f4f4f0] font-bold hover:text-[#5d513f] transition-colors duration-300 font-label text-sm" href="#">书卷</a>
+<a class="text-[#695d4a]/60 dark:text-[#f4f4f0]/60 hover:text-[#5d513f] transition-colors duration-300 font-label text-sm" href="#">收藏</a>
+<a class="text-[#695d4a]/60 dark:text-[#f4f4f0]/60 hover:text-[#5d513f] transition-colors duration-300 font-label text-sm" href="#">撰写</a>
+<a class="text-[#695d4a]/60 dark:text-[#f4f4f0]/60 hover:text-[#5d513f] transition-colors duration-300 font-label text-sm" href="#">设置</a>
+</div>
+<div class="flex items-center gap-3">
+<div class="relative group">
+<input class="bg-surface-container-low border-none focus:ring-0 text-sm font-label rounded-full py-2 pl-4 pr-10 w-48 md:w-64 transition-all focus:w-72" placeholder="搜索往事..." type="text"/>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-primary/40">search</span>
+</div>
+<button class="p-2 text-primary/60 hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="filter_list">filter_list</span>
+</button>
+<button class="p-2 text-primary/60 hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+</div>
+</header>
+<main class="flex-1 w-full bg-[#f4f1ea] dark:bg-stone-950 overflow-hidden relative">
+<!-- Background Lighting and Textures -->
+<div class="absolute inset-0 shelf-lighting pointer-events-none"></div>
+<div class="max-w-6xl mx-auto px-6 py-12 relative z-10 h-full">
+<header class="mb-16">
+<span class="font-label text-xs uppercase tracking-[0.3em] text-primary/40 mb-2 block">Library of Memories</span>
+<h1 class="font-headline text-5xl font-bold text-primary tracking-tighter leading-tight">时光之书</h1>
+</header>
+<!-- The Bookshelf Container -->
+<div class="space-y-32">
+<!-- Shelf Row 1 -->
+<div class="relative">
+<div class="flex items-end gap-1 px-4 mb-1">
+<!-- Book: 2023 氛围日记 -->
+<div class="group relative cursor-pointer transform transition-all duration-500 hover:-translate-y-4 hover:rotate-1">
+<div class="w-20 h-72 linen-texture bg-[#dcd2c1] rounded-l-sm rounded-r-md book-shadow flex items-center justify-center border-l border-white/20">
+<span class="book-spine font-headline text-primary text-xl font-bold tracking-tight">2023 氛围日记</span>
+</div>
+<div class="absolute -top-12 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap bg-white/80 backdrop-blur px-3 py-1 rounded text-[10px] font-label uppercase tracking-widest text-primary shadow-sm">Explore Chapter</div>
+</div>
+<!-- Book: 冬日往事 -->
+<div class="group relative cursor-pointer transform transition-all duration-500 hover:-translate-y-4 hover:-rotate-1">
+<div class="w-16 h-64 leather-texture bg-[#4a3f35] rounded-l-sm rounded-r-md book-shadow flex items-center justify-center border-l border-white/10">
+<span class="book-spine font-headline text-[#dcd2c1] text-sm tracking-widest">冬日往事</span>
+</div>
+</div>
+<!-- Spacer/Small gaps for realism -->
+<div class="w-2"></div>
+<!-- Book: 灵感集 -->
+<div class="group relative cursor-pointer transform transition-all duration-500 hover:-translate-y-4 hover:rotate-2">
+<div class="w-14 h-56 paper-texture bg-[#f8f5f0] rounded-l-sm rounded-r-md book-shadow flex items-center justify-center border-l border-stone-200">
+<span class="book-spine font-headline text-stone-600 text-xs font-semibold tracking-tighter">灵感集</span>
+</div>
+</div>
+<!-- Thin Journals -->
+<div class="w-8 h-48 bg-[#695d4a] rounded-sm opacity-80 ml-4 border-l border-white/5"></div>
+<div class="w-10 h-52 bg-[#5d513f] rounded-sm opacity-90 border-l border-white/5"></div>
+</div>
+<!-- Wood Shelf Base -->
+<div class="h-6 w-full bg-[#e3dccb] dark:bg-stone-800 rounded-sm shelf-shadow relative">
+<div class="absolute inset-0 bg-black/5 pointer-events-none"></div>
+<div class="absolute top-0 left-0 right-0 h-[1px] bg-white/30"></div>
+</div>
+<div class="mt-4 font-label text-[10px] uppercase tracking-widest text-primary/40 pl-4">近期所辑</div>
+</div>
+<!-- Shelf Row 2 -->
+<div class="relative max-w-4xl">
+<div class="flex items-end gap-1 px-4 mb-1">
+<!-- Book: 旧城漫步 -->
+<div class="group relative cursor-pointer transform transition-all duration-500 hover:-translate-y-4">
+<div class="w-18 h-60 linen-texture bg-[#8d8374] rounded-l-sm rounded-r-md book-shadow flex items-center justify-center border-l border-white/10">
+<span class="book-spine font-headline text-white/90 text-sm tracking-widest">旧城漫步</span>
+</div>
+</div>
+<!-- Several thin notebooks leaning -->
+<div class="w-12 h-64 bg-[#c8bba8] rounded-l-sm rounded-r-md book-shadow transform -rotate-6 origin-bottom ml-6 border-l border-white/20"></div>
+<div class="w-12 h-64 bg-[#b8aa95] rounded-l-sm rounded-r-md book-shadow transform -rotate-3 origin-bottom -ml-4 border-l border-white/20"></div>
+<!-- Book: 寄往春天的信 -->
+<div class="group relative cursor-pointer transform transition-all duration-500 hover:-translate-y-4 ml-12">
+<div class="w-22 h-68 leather-texture bg-[#332b24] rounded-l-sm rounded-r-md book-shadow flex items-center justify-center border-l border-white/5">
+<span class="book-spine font-headline text-[#f2e0c8] text-base font-bold tracking-tight uppercase">春日信笺</span>
+</div>
+</div>
+</div>
+<!-- Wood Shelf Base -->
+<div class="h-6 w-full bg-[#e3dccb] dark:bg-stone-800 rounded-sm shelf-shadow relative">
+<div class="absolute inset-0 bg-black/5"></div>
+</div>
+<div class="mt-4 font-label text-[10px] uppercase tracking-widest text-primary/40 pl-4">往岁尘封</div>
+</div>
+</div>
+<!-- Library Statistics Overlay -->
+<div class="mt-24 flex items-center justify-center gap-16 border-t border-primary/10 pt-12">
+<div class="text-center">
+<span class="block font-headline text-4xl font-bold text-primary">128</span>
+<span class="font-label text-[10px] uppercase tracking-widest text-primary/40">Total Entries</span>
+</div>
+<div class="h-12 w-[1px] bg-primary/10"></div>
+<div class="text-center">
+<span class="block font-headline text-4xl font-bold text-primary">24</span>
+<span class="font-label text-[10px] uppercase tracking-widest text-primary/40">Collections</span>
+</div>
+</div>
+</div>
+<!-- Floating action hint -->
+<div class="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-40 hover:opacity-100 transition-opacity">
+<span class="font-label text-[10px] uppercase tracking-[0.3em] text-primary">Scroll to explore deeper shelves</span>
+<span class="material-symbols-outlined animate-bounce text-primary" data-icon="keyboard_double_arrow_down">keyboard_double_arrow_down</span>
+</div>
+</main>
+<!-- BottomNavBar (Mobile only) -->
+<nav class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-md z-50 flex justify-around items-center py-3 px-4 bg-[#ffffff]/90 dark:bg-stone-950/90 backdrop-blur-lg rounded-full shadow-lg md:hidden">
+<a class="flex flex-col items-center justify-center text-primary scale-110" href="#">
+<span class="material-symbols-outlined" data-icon="auto_stories" style="font-variation-settings: 'FILL' 1;">auto_stories</span>
+<span class="font-label text-[10px] uppercase tracking-widest mt-1">书卷</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary/40" href="#">
+<span class="material-symbols-outlined" data-icon="star">star</span>
+<span class="font-label text-[10px] uppercase tracking-widest mt-1">收藏</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary/40" href="#">
+<span class="material-symbols-outlined" data-icon="edit_note">edit_note</span>
+<span class="font-label text-[10px] uppercase tracking-widest mt-1">撰写</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary/40" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-label text-[10px] uppercase tracking-widest mt-1">设置</span>
+</a>
+</nav>
+</body></html>

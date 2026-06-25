@@ -1,0 +1,1194 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Vibe Diary — 写给自己的隐私后花园</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #fbfaf5;
+      --paper: #fffdf6;
+      --paper-2: #fff7d1;
+      --ink: #1f2933;
+      --muted: #5c6670;
+      --line: #1f2933;
+      --blue: #4ea1ff;
+      --green: #52c184;
+      --yellow: #ffd75e;
+      --pink: #ff8ba7;
+      --purple: #a78bfa;
+      --orange: #ffb168;
+      --shadow: rgba(31, 41, 51, 0.18);
+      --shadow-strong: rgba(31, 41, 51, 0.26);
+      --card-radius: 8px;
+      --max: 1160px;
+      --font: "Comic Sans MS", "Trebuchet MS", "LXGW WenKai", "STKaiti", "KaiTi", system-ui, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at 18px 18px, rgba(31, 41, 51, 0.055) 1.2px, transparent 1.3px),
+        linear-gradient(180deg, var(--bg), var(--bg));
+      background-size: 28px 28px, auto;
+      color: var(--ink);
+      font-family: var(--font);
+      line-height: 1.65;
+      overflow-x: hidden;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; }
+
+    .page { min-height: 100vh; }
+
+    /* ---------- 顶栏 ---------- */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      backdrop-filter: blur(12px);
+      background: color-mix(in srgb, var(--bg) 86%, transparent);
+      border-bottom: 2px dashed color-mix(in srgb, var(--line) 45%, transparent);
+    }
+    .topbar-inner {
+      width: min(var(--max), calc(100% - 28px));
+      margin: 0 auto;
+      min-height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+    .brand-mark {
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      border: 2.5px solid var(--line);
+      border-radius: 8px;
+      background: var(--yellow);
+      transform: rotate(-5deg);
+      box-shadow: 3px 3px 0 var(--shadow-strong);
+    }
+    .nav {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      overflow-x: auto;
+      padding: 10px 0;
+      scrollbar-width: none;
+    }
+    .nav::-webkit-scrollbar { display: none; }
+    .nav a {
+      min-height: 38px;
+      border: 2px solid var(--line);
+      border-radius: 999px;
+      background: var(--paper);
+      color: var(--ink);
+      box-shadow: 2px 2px 0 var(--shadow);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 6px 12px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+    }
+    .nav a:hover {
+      transform: translate(-1px, -1px) rotate(-1deg);
+      box-shadow: 4px 4px 0 var(--shadow-strong);
+    }
+
+    /* ---------- Hero ---------- */
+    .hero {
+      position: relative;
+      width: min(var(--max), calc(100% - 28px));
+      margin: 34px auto 20px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
+      align-items: center;
+      gap: 30px;
+      padding-bottom: 32px;
+    }
+    .hero-copy { position: relative; z-index: 2; }
+
+    .label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 2px solid var(--line);
+      border-radius: 999px;
+      padding: 7px 12px;
+      background: var(--paper-2);
+      box-shadow: 3px 3px 0 var(--shadow);
+      transform: rotate(-1.6deg);
+      font-weight: 800;
+    }
+
+    h1, h2, h3, p { margin: 0; }
+
+    h1 {
+      margin-top: 20px;
+      max-width: 760px;
+      font-size: 78px;
+      line-height: 1.02;
+      text-wrap: balance;
+    }
+    .subtitle {
+      margin-top: 22px;
+      max-width: 760px;
+      color: var(--muted);
+      font-size: 24px;
+      line-height: 1.35;
+      text-wrap: balance;
+    }
+    .hero-intro {
+      margin-top: 18px;
+      max-width: 620px;
+      color: var(--muted);
+      font-size: 17px;
+      line-height: 1.8;
+    }
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+      margin-top: 26px;
+    }
+
+    .sketch-button {
+      border: 2.5px solid var(--line);
+      border-radius: 8px;
+      color: var(--ink);
+      background: var(--green);
+      box-shadow: 5px 5px 0 var(--shadow-strong);
+      padding: 11px 16px;
+      font-weight: 900;
+      cursor: pointer;
+      transform: rotate(-1deg);
+      transition: transform 160ms ease, box-shadow 160ms ease;
+    }
+    .sketch-button.secondary {
+      background: var(--paper);
+      transform: rotate(1deg);
+    }
+    .sketch-button:hover {
+      transform: translate(-2px, -2px) rotate(0deg);
+      box-shadow: 7px 7px 0 var(--shadow-strong);
+    }
+
+    /* Hero 右侧手绘板 */
+    .hero-board {
+      position: relative;
+      min-height: 540px;
+    }
+    .doodle-card {
+      position: absolute;
+      border: 2.5px solid var(--line);
+      border-radius: 8px;
+      background: var(--paper);
+      box-shadow: 6px 6px 0 var(--shadow);
+      padding: 16px;
+    }
+    .doodle-card strong {
+      display: block;
+      font-size: 18px;
+      line-height: 1.2;
+    }
+    .doodle-card small {
+      color: var(--muted);
+      display: block;
+      margin-top: 5px;
+    }
+    .hero-board .card-1 {
+      width: 210px;
+      top: 26px;
+      left: 40px;
+      background: var(--paper-2);
+      transform: rotate(-4deg);
+    }
+    .hero-board .card-2 {
+      width: 235px;
+      top: 190px;
+      right: 8px;
+      background: color-mix(in srgb, var(--blue) 28%, var(--paper));
+      transform: rotate(3deg);
+    }
+    .hero-board .card-3 {
+      width: 230px;
+      bottom: 70px;
+      left: 18px;
+      background: color-mix(in srgb, var(--pink) 22%, var(--paper));
+      transform: rotate(2deg);
+    }
+    .hero-illustration {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      color: var(--line);
+    }
+    .hero-hint {
+      position: absolute;
+      bottom: 12px;
+      right: 20px;
+      color: var(--muted);
+      transform: rotate(-3deg);
+      font-weight: 800;
+    }
+
+    /* ---------- 通用 section ---------- */
+    section {
+      width: min(var(--max), calc(100% - 28px));
+      margin: 0 auto;
+      padding: 64px 0 16px;
+      scroll-margin-top: 82px;
+    }
+    .section-title {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 28px;
+    }
+    .section-title h2 {
+      font-size: 46px;
+      line-height: 1.1;
+    }
+    .section-title p {
+      max-width: 760px;
+      color: var(--muted);
+      font-size: 18px;
+    }
+
+    /* ---------- 通用卡片 ---------- */
+    .sketch-card {
+      border: 2.5px solid var(--line);
+      border-radius: var(--card-radius);
+      background: var(--paper);
+      box-shadow: 5px 5px 0 var(--shadow);
+      padding: 18px;
+      transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
+    }
+    .sketch-card:nth-child(odd) { transform: rotate(-0.5deg); }
+    .sketch-card:nth-child(even) { transform: rotate(0.5deg); }
+    .sketch-card:hover {
+      transform: translate(-1px, -2px) rotate(0deg);
+      box-shadow: 7px 7px 0 var(--shadow-strong);
+    }
+
+    /* ---------- 白板 Demo 展示区 ---------- */
+    .whiteboard {
+      position: relative;
+      border: 2.5px solid var(--line);
+      border-radius: var(--card-radius);
+      background: var(--paper);
+      box-shadow: 7px 7px 0 var(--shadow);
+      padding: 32px 28px;
+    }
+    .whiteboard::before {
+      content: "";
+      position: absolute;
+      top: -14px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 22px;
+      background: color-mix(in srgb, var(--muted) 70%, var(--paper));
+      border: 2px solid var(--line);
+      border-radius: 6px 6px 12px 12px;
+      box-shadow: 0 3px 0 var(--shadow);
+    }
+    .whiteboard-title {
+      text-align: center;
+      font-size: 34px;
+      margin-bottom: 6px;
+    }
+    .whiteboard-sub {
+      text-align: center;
+      color: var(--muted);
+      font-size: 15px;
+      margin-bottom: 32px;
+    }
+
+    .demo-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+    .demo-block {
+      position: relative;
+      border: 2px dashed color-mix(in srgb, var(--line) 50%, transparent);
+      border-radius: var(--card-radius);
+      padding: 26px 20px 20px;
+      background: color-mix(in srgb, var(--paper-2) 18%, var(--paper));
+    }
+    .demo-label {
+      position: absolute;
+      top: -13px;
+      left: 18px;
+      background: var(--paper-2);
+      padding: 4px 12px;
+      border: 2px solid var(--line);
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 900;
+      transform: rotate(-2deg);
+      box-shadow: 2px 2px 0 var(--shadow);
+    }
+    .demo-caption {
+      margin-top: 14px;
+      font-size: 13px;
+      color: var(--muted);
+      text-align: center;
+    }
+    .annotation {
+      position: absolute;
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 800;
+      pointer-events: none;
+    }
+    .annotation-tr { top: -26px; right: -6px; transform: rotate(6deg); }
+    .annotation-bl { bottom: -26px; left: -6px; transform: rotate(-5deg); }
+
+    /* A. 翻页 Demo (GIF) */
+    .flip-demo {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .demo-gif {
+      width: 100%;
+      max-width: 640px;
+      height: auto;
+      border: 2.5px solid var(--line);
+      border-radius: 8px;
+      box-shadow: 5px 5px 0 var(--shadow);
+      background: var(--paper);
+      margin: 12px 0;
+    }
+
+    /* B. 灵感卡片散落 Demo (GIF) */
+    .cards-demo {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* C. 右侧面板 */
+    .panel-demo {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+    }
+    .panel-widget {
+      border: 2px solid var(--line);
+      border-radius: var(--card-radius);
+      background: var(--paper);
+      box-shadow: 4px 4px 0 var(--shadow);
+      padding: 14px;
+      transform: rotate(-0.5deg);
+    }
+    .panel-widget:nth-child(even) { transform: rotate(0.5deg); }
+    .panel-widget-title {
+      font-size: 13px;
+      font-weight: 900;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .panel-search-box {
+      border: 2px dashed color-mix(in srgb, var(--line) 45%, transparent);
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 12px;
+      color: var(--muted);
+      background: color-mix(in srgb, var(--paper-2) 30%, var(--paper));
+    }
+    .panel-random-item {
+      font-size: 11px;
+      color: var(--muted);
+      padding: 5px 0;
+      border-bottom: 1px dashed color-mix(in srgb, var(--line) 30%, transparent);
+      line-height: 1.5;
+    }
+    .panel-random-item:last-child { border-bottom: none; }
+    .panel-stat-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      margin: 3px 0;
+    }
+    .panel-tag {
+      display: inline-block;
+      font-size: 11px;
+      padding: 3px 9px;
+      background: color-mix(in srgb, var(--green) 22%, var(--paper));
+      border: 1.5px solid var(--line);
+      border-radius: 999px;
+      margin: 2px 3px;
+      font-weight: 800;
+    }
+
+    /* ---------- 卡片网格 ---------- */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 18px;
+    }
+    .feature-card {
+      border: 2.5px solid var(--line);
+      border-radius: var(--card-radius);
+      background: var(--paper);
+      box-shadow: 5px 5px 0 var(--shadow);
+      padding: 18px;
+      transform: rotate(var(--tilt, -0.5deg));
+      transition: transform 180ms ease, box-shadow 180ms ease;
+    }
+    .feature-card:hover {
+      transform: translate(-1px, -2px) rotate(0deg);
+      box-shadow: 7px 7px 0 var(--shadow-strong);
+    }
+    .feature-icon {
+      width: 44px;
+      height: 44px;
+      display: grid;
+      place-items: center;
+      border: 2px solid var(--line);
+      border-radius: 8px;
+      background: var(--accent, var(--paper-2));
+      box-shadow: 2px 2px 0 var(--shadow);
+      font-size: 22px;
+      margin-bottom: 10px;
+    }
+    .feature-card h3 {
+      font-size: 18px;
+      margin-bottom: 6px;
+    }
+    .feature-card p {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    /* ---------- 双列区（用户/痛点） ---------- */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
+    }
+    .col-title {
+      font-size: 22px;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .user-list, .pain-list {
+      display: grid;
+      gap: 12px;
+    }
+    .user-item, .pain-item {
+      border: 2px solid var(--line);
+      border-radius: var(--card-radius);
+      background: var(--paper);
+      box-shadow: 4px 4px 0 var(--shadow);
+      padding: 14px 16px;
+      transform: rotate(var(--tilt, -0.5deg));
+      transition: transform 180ms ease, box-shadow 180ms ease;
+    }
+    .user-item:hover, .pain-item:hover {
+      transform: translate(-1px, -1px) rotate(0deg);
+      box-shadow: 5px 5px 0 var(--shadow-strong);
+    }
+    .user-item strong, .pain-item strong {
+      font-size: 15px;
+      display: block;
+      margin-bottom: 4px;
+    }
+    .user-item p, .pain-item p {
+      font-size: 13px;
+      color: var(--muted);
+      margin: 0;
+    }
+
+    /* ---------- 原则区 ---------- */
+    .principles {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 18px;
+    }
+    .principle {
+      border: 2.5px solid var(--line);
+      border-radius: var(--card-radius);
+      background: var(--paper);
+      box-shadow: 5px 5px 0 var(--shadow);
+      padding: 20px;
+      text-align: center;
+      transform: rotate(var(--tilt, -0.5deg));
+    }
+    .principle-icon {
+      width: 48px;
+      height: 48px;
+      display: grid;
+      place-items: center;
+      margin: 0 auto 10px;
+      border: 2px solid var(--line);
+      border-radius: 8px;
+      background: var(--accent);
+      box-shadow: 2px 2px 0 var(--shadow);
+      font-size: 24px;
+    }
+    .principle h4 { font-size: 17px; margin-bottom: 6px; }
+    .principle p { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+    /* ---------- 技术架构流程图 ---------- */
+    .tech-flow {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      margin: 24px 0;
+    }
+    .tech-node {
+      border: 2.5px solid var(--line);
+      border-radius: var(--card-radius);
+      background: var(--paper);
+      box-shadow: 4px 4px 0 var(--shadow);
+      padding: 12px 26px;
+      font-size: 15px;
+      font-weight: 900;
+      text-align: center;
+      min-width: 220px;
+      transform: rotate(var(--tilt, 0deg));
+    }
+    .tech-arrow {
+      font-size: 22px;
+      color: var(--muted);
+      animation: arrowBounce 2s ease-in-out infinite;
+    }
+    @keyframes arrowBounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(4px); }
+    }
+    .tech-tags {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 22px;
+    }
+    .tech-tag {
+      border: 2px solid var(--line);
+      border-radius: 999px;
+      padding: 6px 12px;
+      background: var(--paper-2);
+      box-shadow: 2px 2px 0 var(--shadow);
+      font-weight: 800;
+      font-size: 13px;
+      transform: rotate(var(--tilt, 0deg));
+    }
+
+    /* ---------- 未来方向 ---------- */
+    .future-list {
+      max-width: 680px;
+      margin: 0 auto;
+      display: grid;
+      gap: 12px;
+      list-style: none;
+      padding: 0;
+    }
+    .future-item {
+      border: 2px dashed color-mix(in srgb, var(--line) 55%, transparent);
+      border-radius: var(--card-radius);
+      background: var(--paper);
+      box-shadow: 3px 3px 0 var(--shadow);
+      padding: 14px 18px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      transform: rotate(var(--tilt, 0deg));
+    }
+    .future-bullet {
+      color: var(--muted);
+      font-weight: 900;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .future-item-text {
+      font-size: 14px;
+      color: var(--ink);
+      line-height: 1.6;
+    }
+    .future-badge {
+      display: inline-block;
+      font-size: 10px;
+      background: color-mix(in srgb, var(--yellow) 55%, var(--paper));
+      padding: 2px 8px;
+      border: 1.5px solid var(--line);
+      border-radius: 999px;
+      margin-left: 6px;
+      font-weight: 900;
+    }
+
+    /* ---------- 结尾 ---------- */
+    .ending {
+      text-align: center;
+      padding: 64px 0 48px;
+    }
+    .ending-quote {
+      font-size: 26px;
+      font-style: italic;
+      max-width: 640px;
+      margin: 0 auto 18px;
+      line-height: 1.7;
+    }
+    .ending-sign {
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    /* ---------- SVG 手绘线条 ---------- */
+    .scribble {
+      stroke: currentColor;
+      stroke-width: 4;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .scribble-thin {
+      stroke: currentColor;
+      stroke-width: 2.4;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .dash {
+      stroke-dasharray: 9 10;
+      animation: dash 22s linear infinite;
+    }
+    @keyframes dash { to { stroke-dashoffset: -220; } }
+    .wiggle {
+      animation: wiggle 4.5s ease-in-out infinite;
+      transform-origin: center;
+    }
+    @keyframes wiggle {
+      0%, 100% { transform: rotate(-1deg) translateY(0); }
+      50% { transform: rotate(1deg) translateY(-4px); }
+    }
+
+    .divider {
+      text-align: center;
+      margin: 30px 0;
+    }
+    .divider svg { width: 200px; height: 20px; color: var(--muted); }
+
+    /* ---------- 滚动进入 ---------- */
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ---------- 响应式 ---------- */
+    @media (max-width: 980px) {
+      .topbar-inner {
+        align-items: flex-start;
+        flex-direction: column;
+        padding: 10px 0;
+      }
+      .hero {
+        grid-template-columns: 1fr;
+        min-height: auto;
+      }
+      h1 { font-size: 60px; }
+      .section-title h2 { font-size: 38px; }
+      .hero-board { min-height: 440px; }
+      .demo-grid { grid-template-columns: 1fr; }
+      .two-col { grid-template-columns: 1fr; }
+      .panel-demo { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 680px) {
+      .brand { white-space: normal; }
+      h1 { font-size: 42px; }
+      .subtitle { font-size: 18px; }
+      .section-title h2 { font-size: 32px; }
+      .hero-board { min-height: 380px; }
+      .hero-board .card-1 { left: 4px; top: 16px; width: 188px; }
+      .hero-board .card-2 { right: 0; top: 145px; width: 198px; }
+      .hero-board .card-3 { left: 20px; bottom: 42px; width: 200px; }
+      section { padding-top: 48px; }
+      .mini-book { width: 180px; height: 130px; }
+      .float-card { width: 92px; padding: 8px; }
+      .float-card-text { font-size: 10px; }
+      .ending-quote { font-size: 20px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 1ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: 1ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <!-- ========== 顶栏 ========== -->
+    <header class="topbar">
+      <div class="topbar-inner">
+        <a class="brand" href="#top" aria-label="回到顶部">
+          <span class="brand-mark">V</span>
+          <span>Vibe Diary 创意展示</span>
+        </a>
+        <nav class="nav" aria-label="页面导航">
+          <a href="#demo">特色展示</a>
+          <a href="#why">创意来源</a>
+          <a href="#users">用户痛点</a>
+          <a href="#features">当前特色</a>
+          <a href="#principles">产品原则</a>
+          <a href="#tech">技术架构</a>
+          <a href="#future">未来方向</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="top">
+      <!-- ========== Hero ========== -->
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <div class="label">📌 一张白板讲清楚</div>
+          <h1 id="hero-title">Vibe Diary</h1>
+          <p class="subtitle">~ 写给自己的隐私后花园 ~</p>
+          <p class="hero-intro">
+            一个有翻页感、有书架感、有回忆感的数字日记本，<br>
+            让用户安静地记录生活、收藏灵感、回看过去。
+          </p>
+          <div class="hero-actions">
+            <a class="sketch-button" href="#demo">看特色展示</a>
+            <a class="sketch-button secondary" href="#principles">先看产品原则</a>
+          </div>
+        </div>
+
+        <div class="hero-board" aria-hidden="true">
+          <svg class="hero-illustration" viewBox="0 0 520 560" role="img" aria-label="手绘日记本插画">
+            <!-- 连接虚线 -->
+            <path class="scribble dash" d="M166 86 C250 90 345 132 382 198 C399 229 377 247 332 253" />
+            <path class="scribble dash" d="M335 294 C278 318 222 360 194 423" />
+            <path class="scribble-thin" d="M64 465 c71 31 172 40 268 20 c70 -14 117 -43 144 -83" opacity=".45" />
+            <!-- 手绘日记本 -->
+            <g class="wiggle">
+              <path class="scribble" d="M384 36 l58 18 l-13 62 l-63 -12 z" />
+              <path class="scribble-thin" d="M382 54 l47 12 M378 74 l42 11 M374 94 l35 9" />
+              <path class="scribble-thin" d="M435 50 l24 -20 M445 70 l35 -2 M430 102 l22 25" />
+            </g>
+            <!-- 手绘小笑脸 -->
+            <g transform="translate(350 332) scale(.75)">
+              <path class="scribble" d="M22 24 c18 -26 68 -25 85 2 c18 28 -2 67 -42 70 c-37 4 -68 -28 -43 -72 z" />
+              <path class="scribble-thin" d="M50 35 c10 13 26 15 39 0 M43 64 c18 15 39 14 58 -1" />
+              <path class="scribble-thin" d="M20 82 l-32 39 M95 86 l36 33" />
+              <circle cx="52" cy="51" r="3" fill="currentColor" />
+              <circle cx="83" cy="51" r="3" fill="currentColor" />
+            </g>
+          </svg>
+          <div class="doodle-card card-1">
+            <strong>翻页阅读</strong>
+            <small>像翻开一本真实日记，丝滑沉浸。</small>
+          </div>
+          <div class="doodle-card card-2">
+            <strong>灵感收藏</strong>
+            <small>碎片散落桌面，每一张都是某一刻的心情。</small>
+          </div>
+          <div class="doodle-card card-3">
+            <strong>隐私后花园</strong>
+            <small>日记默认属于你自己，不交给 AI。</small>
+          </div>
+          <div class="hero-hint">往下，还有完整展示 ↓</div>
+        </div>
+      </section>
+
+      <!-- ========== 白板 Demo 展示区 ========== -->
+      <section id="demo" aria-labelledby="demo-title">
+        <div class="section-title">
+          <span class="label">Section 1</span>
+          <h2 id="demo-title">作品特色展示</h2>
+          <p>Vibe Diary 的两个核心亮点：丝滑翻页与灵感卡片散落。</p>
+        </div>
+
+        <div class="whiteboard reveal">
+          <div class="demo-grid" style="grid-template-columns: 1fr;">
+            <!-- A. 翻页 Demo -->
+            <div class="demo-block">
+              <span class="demo-label">A. 翻页体验</span>
+              <div class="annotation annotation-tr wiggle">↗ Silky Page Flip</div>
+
+              <div class="flip-demo">
+                <img class="demo-gif" src="flip-demo-ezgif.com-optimize.gif" alt="翻页效果演示" loading="lazy">
+              </div>
+
+              <div class="annotation annotation-bl wiggle">↙ 像翻开一本真实日记</div>
+              <p class="demo-caption">柔和阴影 · 真实翻页弧度 · 沉浸式阅读</p>
+            </div>
+
+            <!-- B. 灵感卡片散落 Demo -->
+            <div class="demo-block">
+              <span class="demo-label">B. 灵感碎片</span>
+              <div class="annotation annotation-tr wiggle">↗ Floating Cards</div>
+
+              <div class="cards-demo">
+                <img class="demo-gif" src="cards-demo-ezgif.com-optimize.gif" alt="灵感卡片散落效果演示" loading="lazy">
+              </div>
+
+              <div class="annotation annotation-bl wiggle">↙ 散落在桌面的灵感</div>
+              <p class="demo-caption">每一张卡片都是某一刻的心情</p>
+            </div>
+          </div>
+
+          <!-- C. 右侧灵感面板 -->
+          <div class="demo-block" style="margin-top: 20px;">
+            <span class="demo-label">C. 灵感面板（便签风）</span>
+            <div class="annotation annotation-tr wiggle">↗ 像贴在白板上的便签</div>
+
+            <div class="panel-demo">
+              <div class="panel-widget">
+                <div class="panel-widget-title">🔍 搜索收藏</div>
+                <div class="panel-search-box">输入关键词搜索灵感碎片...</div>
+              </div>
+              <div class="panel-widget">
+                <div class="panel-widget-title">✨ 随机灵感</div>
+                <div class="panel-random-item">"这里的阳光有一种陈旧的香气，像是翻开了一本很久没读的旧书。"</div>
+                <div class="panel-random-item">"有时候，沉默是比言语更动人的叙述。"</div>
+                <div class="panel-random-item">"我并不渴望变得完整，我只渴望变得真实。"</div>
+              </div>
+              <div class="panel-widget">
+                <div class="panel-widget-title">📊 收藏统计</div>
+                <div class="panel-stat-row"><span>总收藏</span><strong>5</strong></div>
+                <div class="panel-stat-row"><span>本月新增</span><strong>2</strong></div>
+                <div class="panel-stat-row"><span>引用</span><strong>2</strong></div>
+                <div class="panel-stat-row"><span>精选</span><strong>1</strong></div>
+              </div>
+              <div class="panel-widget">
+                <div class="panel-widget-title">🏷 常用标签</div>
+                <span class="panel-tag">冥想</span>
+                <span class="panel-tag">夜读</span>
+                <span class="panel-tag">雨后</span>
+                <span class="panel-tag">京都</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== 创意来源 ========== -->
+      <section id="why" aria-labelledby="why-title">
+        <div class="section-title">
+          <span class="label">Section 2</span>
+          <h2 id="why-title">创意来源</h2>
+          <p>为什么我想做 Vibe Diary？</p>
+        </div>
+        <div class="sketch-card reveal" style="max-width: 720px; margin: 0 auto; padding: 28px 30px;">
+          <p style="font-size: 16px; color: var(--ink); line-height: 1.9;">
+            很多人想写日记，但<strong>普通笔记软件太工具化</strong>，纸质日记又不方便长期保存和回顾。
+            更重要的是，日记往往是很私密的内容，很多用户<strong>不希望默认把自己的文字交给 AI 分析</strong>。
+          </p>
+          <p style="font-size: 16px; color: var(--ink); line-height: 1.9; margin-top: 14px;">
+            因此 Vibe Diary 的想法是：<br>
+            <strong style="font-size: 18px;">先做好记录体验，先尊重隐私，再把智能能力变成可选项。</strong>
+          </p>
+        </div>
+      </section>
+
+      <!-- ========== 目标用户与痛点 ========== -->
+      <section id="users" aria-labelledby="users-title">
+        <div class="section-title">
+          <span class="label">Section 3</span>
+          <h2 id="users-title">目标用户 & 痛点</h2>
+          <p>Vibe Diary 想陪伴的人，和他们遇到的麻烦。</p>
+        </div>
+
+        <div class="two-col reveal">
+          <div>
+            <h3 class="col-title">🎯 目标用户</h3>
+            <div class="user-list">
+              <div class="user-item" style="--tilt: -0.8deg;">
+                <strong>想坚持写日记但容易中断的人</strong>
+                <p>需要氛围感和仪式感，而不是冷冰冰的输入框</p>
+              </div>
+              <div class="user-item" style="--tilt: 0.6deg;">
+                <strong>喜欢纸质日记氛围但希望数字化保存的人</strong>
+                <p>想要翻页感、书架感，但又要能搜索和长期保存</p>
+              </div>
+              <div class="user-item" style="--tilt: -0.5deg;">
+                <strong>需要整理情绪和复盘的学生、开发者、职场新人</strong>
+                <p>每天经历很多，需要一个地方沉淀思绪</p>
+              </div>
+              <div class="user-item" style="--tilt: 0.8deg;">
+                <strong>把日记视为私人空间、不希望默认分享给 AI 的用户</strong>
+                <p>希望 AI 是可选项，而不是默认读取所有内容</p>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <h3 class="col-title">😣 痛点</h3>
+            <div class="pain-list">
+              <div class="pain-item" style="--tilt: 0.6deg;">
+                <strong>普通备忘录太冷冰冰</strong>
+                <p>没有氛围感，写日记像在填表单</p>
+              </div>
+              <div class="pain-item" style="--tilt: -0.8deg;">
+                <strong>纸质日记不方便</strong>
+                <p>无法搜索、无法长期保存、容易丢失</p>
+              </div>
+              <div class="pain-item" style="--tilt: 0.5deg;">
+                <strong>AI 产品让人担心隐私</strong>
+                <p>很多 AI 默认读取内容，用户不敢写真心话</p>
+              </div>
+              <div class="pain-item" style="--tilt: -0.6deg;">
+                <strong>写完就忘</strong>
+                <p>过去的情绪和记忆容易被遗忘，很少回看</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== 当前作品特色 ========== -->
+      <section id="features" aria-labelledby="features-title">
+        <div class="section-title">
+          <span class="label">Section 4</span>
+          <h2 id="features-title">当前作品特色</h2>
+          <p>基于 Vibe Diary 源项目真实已实现的能力，不是 PPT，是能跑的代码。</p>
+        </div>
+
+        <div class="card-grid reveal">
+          <article class="feature-card" style="--accent: color-mix(in srgb, var(--yellow) 55%, var(--paper)); --tilt: -0.6deg;">
+            <div class="feature-icon">📚</div>
+            <h3>多本日记本管理</h3>
+            <p>创建多本日记本，按主题或时间分类，如「午夜书写」「2024 氛围日记」。</p>
+          </article>
+          <article class="feature-card" style="--accent: color-mix(in srgb, var(--blue) 28%, var(--paper)); --tilt: 0.5deg;">
+            <div class="feature-icon">🗄️</div>
+            <h3>书架式首页</h3>
+            <p>日记本以拟物书架形式展示，点击即可打开，营造个人精神角落。</p>
+          </article>
+          <article class="feature-card" style="--accent: color-mix(in srgb, var(--green) 30%, var(--paper)); --tilt: -0.5deg;">
+            <div class="feature-icon">📖</div>
+            <h3>翻页阅读体验</h3>
+            <p>基于 StPageFlip 实现真实翻页效果，支持鼠标拖拽、点击翻页，沉浸感强。</p>
+          </article>
+          <article class="feature-card" style="--accent: color-mix(in srgb, var(--pink) 25%, var(--paper)); --tilt: 0.6deg;">
+            <div class="feature-icon">✏️</div>
+            <h3>日记编辑与自动保存</h3>
+            <p>双击页面进入编辑模式，支持长文本编辑，自动保存到本地数据库。</p>
+          </article>
+          <article class="feature-card" style="--accent: color-mix(in srgb, var(--purple) 28%, var(--paper)); --tilt: -0.8deg;">
+            <div class="feature-icon">🌟</div>
+            <h3>灵感收藏</h3>
+            <p>收藏名言、图片、竖排卡片等 5 种形式，3D 散落动画展示，支持搜索筛选。</p>
+          </article>
+          <article class="feature-card" style="--accent: color-mix(in srgb, var(--orange) 32%, var(--paper)); --tilt: 0.5deg;">
+            <div class="feature-icon">📊</div>
+            <h3>写作统计</h3>
+            <p>本周写作页数、连续打卡天数、累计书写页数、环保贡献（节省纸张/减少 CO₂）。</p>
+          </article>
+          <article class="feature-card" style="--accent: color-mix(in srgb, var(--yellow) 50%, var(--paper)); --tilt: -0.5deg;">
+            <div class="feature-icon">🍂</div>
+            <h3>回忆碎片</h3>
+            <p>首页随机展示一条过往日记片段，触发回忆与反思。</p>
+          </article>
+          <article class="feature-card" style="--accent: color-mix(in srgb, var(--blue) 25%, var(--paper)); --tilt: 0.8deg;">
+            <div class="feature-icon">📅</div>
+            <h3>历史上的今天</h3>
+            <p>查看去年、前年的今天写了什么，让过去的自己与现在对话。</p>
+          </article>
+          <article class="feature-card" style="--accent: color-mix(in srgb, var(--green) 25%, var(--paper)); --tilt: -0.6deg;">
+            <div class="feature-icon">🎨</div>
+            <h3>个性化主题</h3>
+            <p>三种主题：极简素白、午夜书房、羊皮故卷，可调字体大小和行高。</p>
+          </article>
+        </div>
+      </section>
+
+      <!-- ========== 产品原则 ========== -->
+      <section id="principles" aria-labelledby="principles-title">
+        <div class="section-title">
+          <span class="label">Section 5</span>
+          <h2 id="principles-title">产品原则</h2>
+          <p>Vibe Diary 坚守的四个底线。</p>
+        </div>
+
+        <div class="principles reveal">
+          <article class="principle" style="--accent: color-mix(in srgb, var(--blue) 35%, var(--paper)); --tilt: -0.8deg;">
+            <div class="principle-icon">🔒</div>
+            <h4>隐私优先</h4>
+            <p>日记默认属于用户自己，不对外公开，不默认上传给 AI。</p>
+          </article>
+          <article class="principle" style="--accent: color-mix(in srgb, var(--green) 35%, var(--paper)); --tilt: 0.6deg;">
+            <div class="principle-icon">📝</div>
+            <h4>记录优先</h4>
+            <p>先把写日记的体验做好，翻页、书架、氛围感，比 AI 更重要。</p>
+          </article>
+          <article class="principle" style="--accent: color-mix(in srgb, var(--yellow) 55%, var(--paper)); --tilt: -0.5deg;">
+            <div class="principle-icon">🤖</div>
+            <h4>AI 可选</h4>
+            <p>未来如果加入 AI，由用户主动开启，而不是默认读取所有日记。</p>
+          </article>
+          <article class="principle" style="--accent: color-mix(in srgb, var(--pink) 28%, var(--paper)); --tilt: 0.8deg;">
+            <div class="principle-icon">🚫</div>
+            <h4>不做诊断</h4>
+            <p>AI 只做复盘提示和整理建议，不做心理诊断，不替代专业咨询。</p>
+          </article>
+        </div>
+      </section>
+
+      <!-- ========== 技术架构 ========== -->
+      <section id="tech" aria-labelledby="tech-title">
+        <div class="section-title">
+          <span class="label">Section 6</span>
+          <h2 id="tech-title">技术架构</h2>
+          <p>Vibe Diary 的技术栈与数据流。</p>
+        </div>
+
+        <div class="sketch-card reveal" style="max-width: 720px; margin: 0 auto; padding: 32px;">
+          <div class="tech-flow">
+            <div class="tech-node" style="--tilt: -0.5deg;">Vue 3 + Vite + Pinia</div>
+            <div class="tech-arrow">↓</div>
+            <div class="tech-node" style="--tilt: 0.5deg;">API 请求（fetch + JWT）</div>
+            <div class="tech-arrow">↓</div>
+            <div class="tech-node" style="--tilt: -0.5deg;">Express 后端</div>
+            <div class="tech-arrow">↓</div>
+            <div class="tech-node" style="--tilt: 0.5deg;">SQLite 数据库（本地持久化）</div>
+            <div class="tech-arrow">↓</div>
+            <div class="tech-node" style="--tilt: -0.5deg;">页面展示</div>
+          </div>
+
+          <div class="tech-tags">
+            <span class="tech-tag" style="--tilt: -1deg;">StPageFlip · 翻页体验</span>
+            <span class="tech-tag" style="--tilt: 0.8deg;">Three.js · 灵感卡片 3D</span>
+            <span class="tech-tag" style="--tilt: -0.6deg;">GSAP · 散落动画</span>
+            <span class="tech-tag" style="--tilt: 1deg;">JWT · 用户认证</span>
+            <span class="tech-tag" style="--tilt: -0.8deg;">SQLite · 本地数据</span>
+            <span class="tech-tag" style="--tilt: 0.5deg;">bcryptjs · 密码加密</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== 未来升级方向 ========== -->
+      <section id="future" aria-labelledby="future-title">
+        <div class="section-title">
+          <span class="label">Section 7</span>
+          <h2 id="future-title">未来升级方向</h2>
+          <p>这些都是「计划中」，不是「已完成」。<span class="future-badge">PLANNED</span></p>
+        </div>
+
+        <ul class="future-list reveal">
+          <li class="future-item" style="--tilt: -0.5deg;">
+            <span class="future-bullet">①</span>
+            <span class="future-item-text">
+              <strong>可选 AI 复盘开关</strong> —— 用户主动选择某篇日记是否进行 AI 分析，默认关闭。
+              <span class="future-badge">计划中</span>
+            </span>
+          </li>
+          <li class="future-item" style="--tilt: 0.5deg;">
+            <span class="future-bullet">②</span>
+            <span class="future-item-text">
+              <strong>情绪标签和趋势回顾</strong> —— 用户手动打情绪标签，生成情绪趋势图，回看自己的变化。
+              <span class="future-badge">计划中</span>
+            </span>
+          </li>
+          <li class="future-item" style="--tilt: -0.6deg;">
+            <span class="future-bullet">③</span>
+            <span class="future-item-text">
+              <strong>AI 周记总结</strong> —— 用户主动触发，AI 基于本周日记生成复盘总结，不做诊断。
+              <span class="future-badge">计划中</span>
+            </span>
+          </li>
+          <li class="future-item" style="--tilt: 0.8deg;">
+            <span class="future-bullet">④</span>
+            <span class="future-item-text">
+              <strong>数据导出</strong> —— 支持导出全部日记和收藏，用户对自己的数据拥有完全控制权。
+              <span class="future-badge">计划中</span>
+            </span>
+          </li>
+          <li class="future-item" style="--tilt: -0.5deg;">
+            <span class="future-bullet">⑤</span>
+            <span class="future-item-text">
+              <strong>隐私日记本</strong> —— 二次密码验证才能打开的私密日记本，保护最私密的内容。
+              <span class="future-badge">计划中</span>
+            </span>
+          </li>
+          <li class="future-item" style="--tilt: 0.6deg;">
+            <span class="future-bullet">⑥</span>
+            <span class="future-item-text">
+              <strong>本地优先的数据处理</strong> —— AI 分析尽量在本地完成，或用户明确授权后才上传。
+              <span class="future-badge">计划中</span>
+            </span>
+          </li>
+        </ul>
+      </section>
+
+      <!-- ========== 结尾 ========== -->
+      <section class="ending">
+        <div class="divider reveal">
+          <svg viewBox="0 0 200 20">
+            <path class="scribble-thin" d="M5 10 Q 40 4, 80 10 T 160 10 T 195 10" />
+            <circle cx="100" cy="10" r="3" fill="currentColor" />
+          </svg>
+        </div>
+
+        <p class="ending-quote reveal">
+          "Vibe Diary 不是让 AI 替你理解自己，<br>
+          而是先给你一个愿意写下自己的地方。"
+        </p>
+
+        <p class="ending-sign reveal">~ Vibe Diary · 一个个人开发者的参赛作品 ~</p>
+
+        <div style="margin-top: 24px;" class="reveal">
+          <svg width="44" height="44" viewBox="0 0 48 48" class="wiggle" style="color: var(--muted);">
+            <path class="scribble" d="M24 6 L28 18 L40 19 L31 27 L33 39 L24 33 L15 39 L17 27 L8 19 L20 18 Z" />
+          </svg>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer" style="width: min(var(--max), calc(100% - 28px)); margin: 0 auto 36px; color: var(--muted); display: flex; justify-content: space-between; gap: 16px; border-top: 2px dashed color-mix(in srgb, var(--line) 45%, transparent); padding-top: 18px; flex-wrap: wrap;">
+      <span>Vibe Diary · 创意展示白板</span>
+      <span>Vue 3 · Express · SQLite · StPageFlip · Three.js</span>
+    </footer>
+  </div>
+
+  <script>
+    // ========== 滚动进入动画 ==========
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>
