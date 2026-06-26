@@ -632,26 +632,27 @@ watch(filterValues, (newVal) => {
 
       <!-- HUD 右侧浮窗面板 -->
       <div class="hud-side-panel" :class="{ 'is-collapsed': !showSidePanel }">
-        <!-- 折叠切换 -->
-        <button
-          @click="showSidePanel = !showSidePanel"
-          class="side-panel-toggle glass-panel"
-        >
-          <span class="material-symbols-outlined text-primary/60 text-base">
-            {{ showSidePanel ? 'chevron_right' : 'chevron_left' }}
-          </span>
-        </button>
-
         <Transition name="panel-slide">
           <div v-if="showSidePanel" class="side-panel-content">
             <div class="glass-panel side-widget">
-              <RandomInspiration @spotlight="handleSpotlight" />
+              <RandomInspiration @spotlight="handleSpotlight" @close-panel="showSidePanel = false" />
             </div>
             <div class="glass-panel side-widget">
               <FavoriteStats :stats="store.stats" />
             </div>
           </div>
         </Transition>
+
+        <!-- 收起时显示展开按钮 -->
+        <button
+          v-if="!showSidePanel"
+          @click="showSidePanel = true"
+          class="side-panel-toggle glass-panel"
+        >
+          <span class="material-symbols-outlined text-primary/60 text-base">
+            chevron_left
+          </span>
+        </button>
       </div>
 
       <!-- HUD 底部提示 -->
@@ -737,9 +738,9 @@ watch(filterValues, (newVal) => {
           <span class="material-symbols-outlined">auto_stories</span>
           <span class="font-label text-[10px] uppercase tracking-widest mt-1">首页</span>
         </a>
-        <a href="/archive" class="flex flex-col items-center text-primary/40 hover:text-primary transition-all">
+        <a href="/reflection" class="flex flex-col items-center text-primary/40 hover:text-primary transition-all">
           <span class="material-symbols-outlined">inventory_2</span>
-          <span class="font-label text-[10px] uppercase tracking-widest mt-1">存档</span>
+          <span class="font-label text-[10px] uppercase tracking-widest mt-1">回望</span>
         </a>
         <a href="#" class="flex flex-col items-center text-primary scale-110">
           <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
@@ -762,7 +763,7 @@ watch(filterValues, (newVal) => {
 .favorites-page {
   position: relative;
   min-height: 100vh;
-  background: var(--md-sys-color-background, #fef7ee);
+  background: var(--bg-primary, #faf9f6);
 }
 
 /* ══════════════════════════════════════════════════════════════ */
@@ -770,10 +771,10 @@ watch(filterValues, (newVal) => {
 /* ══════════════════════════════════════════════════════════════ */
 
 .glass-panel {
-  background: rgba(255, 252, 245, 0.7);
+  background: var(--bg-primary-85, rgba(250, 249, 246, 0.85));
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(139, 119, 90, 0.08);
+  border: 1px solid var(--color-primary-transparent-8, rgba(105, 93, 74, 0.08));
   border-radius: 16px;
   pointer-events: auto;
 }
@@ -830,7 +831,7 @@ watch(filterValues, (newVal) => {
 /* ── HUD 筛选栏 ── */
 .hud-filter {
   position: absolute;
-  top: 80px;
+  top: 100px;
   right: 16px;
   z-index: 20;
   padding: 16px 20px;
@@ -841,7 +842,7 @@ watch(filterValues, (newVal) => {
 /* ── HUD 右侧浮窗 ── */
 .hud-side-panel {
   position: absolute;
-  top: 80px;
+  top: 100px;
   right: 16px;
   bottom: 60px;
   z-index: 15;
@@ -917,7 +918,7 @@ watch(filterValues, (newVal) => {
 }
 
 .top-nav-mobile {
-  background: rgba(254, 247, 238, 0.85);
+  background: var(--bg-primary-85, rgba(250, 249, 246, 0.85));
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   position: sticky;
@@ -941,7 +942,7 @@ watch(filterValues, (newVal) => {
   justify-content: space-around;
   align-items: center;
   padding: 12px 16px;
-  background: rgba(254, 247, 238, 0.9);
+  background: var(--bg-primary-85, rgba(250, 249, 246, 0.85));
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border-radius: 9999px;

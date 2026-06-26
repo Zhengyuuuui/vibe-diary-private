@@ -61,214 +61,239 @@ router.post('/upload-image', authMiddleware, (req, res) => {
 });
 
 router.get('/stats/overview', authMiddleware, (req, res) => {
-  const db = req.db;
-  const userId = req.user.id;
-  
-  const total = db.prepare(
-    'SELECT COUNT(*) as count FROM favorites WHERE user_id = ?'
-  ).get(userId).count;
-  
-  const byType = db.prepare(`
-    SELECT type, COUNT(*) as count 
-    FROM favorites 
-    WHERE user_id = ? 
-    GROUP BY type
-  `).all(userId);
-  
-  const byMood = db.prepare(`
-    SELECT mood, COUNT(*) as count 
-    FROM favorites 
-    WHERE user_id = ? AND mood IS NOT NULL
-    GROUP BY mood
-  `).all(userId);
-  
-  const thisMonth = db.prepare(`
-    SELECT COUNT(*) as count 
-    FROM favorites 
-    WHERE user_id = ? 
-    AND strftime('%Y-%m', created_at) = strftime('%Y-%m', 'now', 'localtime')
-  `).get(userId).count;
-  
-  const recentTags = db.prepare(`
-    SELECT tags 
-    FROM favorites 
-    WHERE user_id = ? AND tags IS NOT NULL 
-    ORDER BY created_at DESC 
-    LIMIT 20
-  `).all(userId);
-  
-  const tagFrequency = {};
-  recentTags.forEach(row => {
-    try {
-      const tags = JSON.parse(row.tags);
-      tags.forEach(tag => {
-        tagFrequency[tag] = (tagFrequency[tag] || 0) + 1;
-      });
-    } catch (e) {}
-  });
-  
-  const topTags = Object.entries(tagFrequency)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 10)
-    .map(([tag, count]) => ({ tag, count }));
-  
-  res.json({
-    code: 200,
-    msg: '获取成功',
-    data: {
-      total,
-      thisMonth,
-      byType,
-      byMood,
-      topTags
-    }
-  });
+  try {
+    const db = req.db;
+    const userId = req.user.id;
+
+    const total = db.prepare(
+      'SELECT COUNT(*) as count FROM favorites WHERE user_id = ?'
+    ).get(userId).count;
+
+    const byType = db.prepare(`
+      SELECT type, COUNT(*) as count
+      FROM favorites
+      WHERE user_id = ?
+      GROUP BY type
+    `).all(userId);
+
+    const byMood = db.prepare(`
+      SELECT mood, COUNT(*) as count
+      FROM favorites
+      WHERE user_id = ? AND mood IS NOT NULL
+      GROUP BY mood
+    `).all(userId);
+
+    const thisMonth = db.prepare(`
+      SELECT COUNT(*) as count
+      FROM favorites
+      WHERE user_id = ?
+      AND strftime('%Y-%m', created_at) = strftime('%Y-%m', 'now', 'localtime')
+    `).get(userId).count;
+
+    const recentTags = db.prepare(`
+      SELECT tags
+      FROM favorites
+      WHERE user_id = ? AND tags IS NOT NULL
+      ORDER BY created_at DESC
+      LIMIT 20
+    `).all(userId);
+
+    const tagFrequency = {};
+    recentTags.forEach(row => {
+      try {
+        const tags = JSON.parse(row.tags);
+        tags.forEach(tag => {
+          tagFrequency[tag] = (tagFrequency[tag] || 0) + 1;
+        });
+      } catch (e) {}
+    });
+
+    const topTags = Object.entries(tagFrequency)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10)
+      .map(([tag, count]) => ({ tag, count }));
+
+    res.json({
+      code: 200,
+      msg: '获取成功',
+      data: {
+        total,
+        thisMonth,
+        byType,
+        byMood,
+        topTags
+      }
+    });
+  } catch (error) {
+    console.error('获取收藏统计失败:', error);
+    res.status(500).json({ code: 500, msg: '获取失败', data: null });
+  }
 });
 
 router.get('/random/inspiration', authMiddleware, (req, res) => {
-  const db = req.db;
-  const userId = req.user.id;
-  const count = Math.min(10, Math.max(1, parseInt(req.query.count) || 3));
-  
-  const favorites = db.prepare(`
-    SELECT * FROM favorites 
-    WHERE user_id = ? 
-    ORDER BY RANDOM() 
-    LIMIT ?
-  `).all(userId, count);
-  
-  const parsedFavorites = favorites.map(fav => ({
-    ...fav,
-    tags: fav.tags ? JSON.parse(fav.tags) : []
-  }));
-  
-  res.json({
-    code: 200,
-    msg: '获取成功',
-    data: parsedFavorites
-  });
+  try {
+    const db = req.db;
+    const userId = req.user.id;
+    const count = Math.min(10, Math.max(1, parseInt(req.query.count) || 3));
+
+    const favorites = db.prepare(`
+      SELECT * FROM favorites
+      WHERE user_id = ?
+      ORDER BY RANDOM()
+      LIMIT ?
+    `).all(userId, count);
+
+    const parsedFavorites = favorites.map(fav => ({
+      ...fav,
+      tags: fav.tags ? JSON.parse(fav.tags) : []
+    }));
+
+    res.json({
+      code: 200,
+      msg: '获取成功',
+      data: parsedFavorites
+    });
+  } catch (error) {
+    console.error('获取随机灵感失败:', error);
+    res.status(500).json({ code: 500, msg: '获取失败', data: null });
+  }
 });
 
 router.get('/search/query', authMiddleware, (req, res) => {
-  const db = req.db;
-  const userId = req.user.id;
-  const query = req.query.q;
-  
-  if (!query || query.trim().length === 0) {
-    return res.json({
+  try {
+    const db = req.db;
+    const userId = req.user.id;
+    const query = req.query.q;
+
+    if (!query || query.trim().length === 0) {
+      return res.json({
+        code: 200,
+        msg: '获取成功',
+        data: []
+      });
+    }
+
+    const searchPattern = `%${query.trim()}%`;
+
+    const favorites = db.prepare(`
+      SELECT * FROM favorites
+      WHERE user_id = ?
+      AND (
+        title LIKE ? OR
+        content LIKE ? OR
+        source LIKE ? OR
+        tags LIKE ?
+      )
+      ORDER BY created_at DESC
+      LIMIT 50
+    `).all(userId, searchPattern, searchPattern, searchPattern, searchPattern);
+
+    const parsedFavorites = favorites.map(fav => ({
+      ...fav,
+      tags: fav.tags ? JSON.parse(fav.tags) : []
+    }));
+
+    res.json({
       code: 200,
       msg: '获取成功',
-      data: []
+      data: parsedFavorites
     });
+  } catch (error) {
+    console.error('搜索收藏失败:', error);
+    res.status(500).json({ code: 500, msg: '搜索失败', data: null });
   }
-  
-  const searchPattern = `%${query.trim()}%`;
-  
-  const favorites = db.prepare(`
-    SELECT * FROM favorites 
-    WHERE user_id = ? 
-    AND (
-      title LIKE ? OR 
-      content LIKE ? OR 
-      source LIKE ? OR
-      tags LIKE ?
-    )
-    ORDER BY created_at DESC
-    LIMIT 50
-  `).all(userId, searchPattern, searchPattern, searchPattern, searchPattern);
-  
-  const parsedFavorites = favorites.map(fav => ({
-    ...fav,
-    tags: fav.tags ? JSON.parse(fav.tags) : []
-  }));
-  
-  res.json({
-    code: 200,
-    msg: '获取成功',
-    data: parsedFavorites
-  });
 });
 
 router.get('/', authMiddleware, (req, res) => {
-  const db = req.db;
-  const userId = req.user.id;
-  
-  const page = Math.max(1, parseInt(req.query.page) || 1);
-  const limit = Math.min(50, Math.max(1, parseInt(req.query.limit) || 20));
-  const offset = (page - 1) * limit;
-  
-  const type = req.query.type;
-  const mood = req.query.mood;
-  const search = req.query.search;
-  
-  let sql = 'SELECT * FROM favorites WHERE user_id = ?';
-  const params = [userId];
-  
-  if (type) {
-    sql += ' AND type = ?';
-    params.push(type);
-  }
-  
-  if (mood) {
-    sql += ' AND mood = ?';
-    params.push(mood);
-  }
-  
-  if (search) {
-    sql += ' AND (title LIKE ? OR content LIKE ? OR source LIKE ?)';
-    const searchPattern = `%${search}%`;
-    params.push(searchPattern, searchPattern, searchPattern);
-  }
-  
-  const countSql = sql.replace('SELECT *', 'SELECT COUNT(*) as count');
-  const total = db.prepare(countSql).get(...params).count;
-  
-  sql += ' ORDER BY created_at DESC LIMIT ? OFFSET ?';
-  params.push(limit, offset);
-  
-  const favorites = db.prepare(sql).all(...params);
-  
-  const parsedFavorites = favorites.map(fav => ({
-    ...fav,
-    tags: fav.tags ? JSON.parse(fav.tags) : []
-  }));
-  
-  res.json({
-    code: 200,
-    msg: '获取成功',
-    data: {
-      list: parsedFavorites,
-      total,
-      page,
-      limit
+  try {
+    const db = req.db;
+    const userId = req.user.id;
+
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(50, Math.max(1, parseInt(req.query.limit) || 20));
+    const offset = (page - 1) * limit;
+
+    const type = req.query.type;
+    const mood = req.query.mood;
+    const search = req.query.search;
+
+    let sql = 'SELECT * FROM favorites WHERE user_id = ?';
+    const params = [userId];
+
+    if (type) {
+      sql += ' AND type = ?';
+      params.push(type);
     }
-  });
+
+    if (mood) {
+      sql += ' AND mood = ?';
+      params.push(mood);
+    }
+
+    if (search) {
+      sql += ' AND (title LIKE ? OR content LIKE ? OR source LIKE ?)';
+      const searchPattern = `%${search}%`;
+      params.push(searchPattern, searchPattern, searchPattern);
+    }
+
+    const countSql = sql.replace('SELECT *', 'SELECT COUNT(*) as count');
+    const total = db.prepare(countSql).get(...params).count;
+
+    sql += ' ORDER BY created_at DESC LIMIT ? OFFSET ?';
+    params.push(limit, offset);
+
+    const favorites = db.prepare(sql).all(...params);
+
+    const parsedFavorites = favorites.map(fav => ({
+      ...fav,
+      tags: fav.tags ? JSON.parse(fav.tags) : []
+    }));
+
+    res.json({
+      code: 200,
+      msg: '获取成功',
+      data: {
+        list: parsedFavorites,
+        total,
+        page,
+        limit
+      }
+    });
+  } catch (error) {
+    console.error('获取收藏列表失败:', error);
+    res.status(500).json({ code: 500, msg: '获取失败', data: null });
+  }
 });
 
 router.get('/:id', authMiddleware, (req, res) => {
-  const db = req.db;
-  const userId = req.user.id;
-  
-  const favorite = db.prepare(
-    'SELECT * FROM favorites WHERE id = ? AND user_id = ?'
-  ).get(req.params.id, userId);
-  
-  if (!favorite) {
-    return res.status(404).json({
-      code: 404,
-      msg: '收藏不存在',
-      data: null
-    });
-  }
-  
-  res.json({
-    code: 200,
-    msg: '获取成功',
-    data: {
-      ...favorite,
-      tags: favorite.tags ? JSON.parse(favorite.tags) : []
+  try {
+    const db = req.db;
+    const userId = req.user.id;
+
+    const favorite = db.prepare(
+      'SELECT * FROM favorites WHERE id = ? AND user_id = ?'
+    ).get(req.params.id, userId);
+
+    if (!favorite) {
+      return res.status(404).json({
+        code: 404,
+        msg: '收藏不存在',
+        data: null
+      });
     }
-  });
+
+    res.json({
+      code: 200,
+      msg: '获取成功',
+      data: {
+        ...favorite,
+        tags: favorite.tags ? JSON.parse(favorite.tags) : []
+      }
+    });
+  } catch (error) {
+    console.error('获取收藏详情失败:', error);
+    res.status(500).json({ code: 500, msg: '获取失败', data: null });
+  }
 });
 
 router.post('/', authMiddleware, (req, res) => {

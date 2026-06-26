@@ -76,42 +76,51 @@ function initDb(dbPath) {
 
   const existingDiaries = db.prepare('SELECT COUNT(*) AS count FROM diaries').get().count;
   if (existingDiaries === 0 && defaultUserId) {
-    db.prepare('INSERT INTO diaries (user_id, title, cover_style, created_at) VALUES (?, ?, ?, ?)').run(
+    // 使用实际返回的 lastInsertRowid 关联 pages，避免假设固定 ID
+    const diary1Result = db.prepare('INSERT INTO diaries (user_id, title, cover_style, created_at) VALUES (?, ?, ?, ?)').run(
       defaultUserId, '午夜书写', 'leather', '2024-01-15 22:00:00'
     );
-    db.prepare('INSERT INTO diaries (user_id, title, cover_style, created_at) VALUES (?, ?, ?, ?)').run(
+    const diary1Id = diary1Result.lastInsertRowid;
+
+    const diary2Result = db.prepare('INSERT INTO diaries (user_id, title, cover_style, created_at) VALUES (?, ?, ?, ?)').run(
       defaultUserId, '2024 氛围日记', 'linen', '2024-02-01 10:00:00'
     );
-    db.prepare('INSERT INTO diaries (user_id, title, cover_style, created_at) VALUES (?, ?, ?, ?)').run(
+    const diary2Id = diary2Result.lastInsertRowid;
+
+    const diary3Result = db.prepare('INSERT INTO diaries (user_id, title, cover_style, created_at) VALUES (?, ?, ?, ?)').run(
       defaultUserId, '夏日呓语', 'pattern', '2024-03-20 14:30:00'
     );
+    const diary3Id = diary3Result.lastInsertRowid;
 
     db.prepare('INSERT INTO pages (diary_id, content, page_num) VALUES (?, ?, ?)').run(
-      1, '今天窗外的雨模糊了城市的边缘，每一扇窗都变成了一幅水彩画。我在窗边坐了很久，看着灰色的世界呼吸……', 1
+      diary1Id, '今天窗外的雨模糊了城市的边缘，每一扇窗都变成了一幅水彩画。我在窗边坐了很久，看着灰色的世界呼吸……', 1
     );
     db.prepare('INSERT INTO pages (diary_id, content, page_num) VALUES (?, ?, ?)').run(
-      1, '静谧时分，墨见真我。在午夜的灯光下，笔尖触碰纸面的声音是最真实的回响。', 2
+      diary1Id, '静谧时分，墨见真我。在午夜的灯光下，笔尖触碰纸面的声音是最真实的回响。', 2
     );
     db.prepare('INSERT INTO pages (diary_id, content, page_num) VALUES (?, ?, ?)').run(
-      2, '新的一年，新的开始。愿每一天都值得被记录，每一刻都值得被珍藏。', 1
+      diary2Id, '新的一年，新的开始。愿每一天都值得被记录，每一刻都值得被珍藏。', 1
     );
     db.prepare('INSERT INTO pages (diary_id, content, page_num) VALUES (?, ?, ?)').run(
-      2, '清晨的阳光透过窗帘洒落，一杯乌龙茶的香气弥漫在空气中。', 2
+      diary2Id, '清晨的阳光透过窗帘洒落，一杯乌龙茶的香气弥漫在空气中。', 2
     );
     db.prepare('INSERT INTO pages (diary_id, content, page_num) VALUES (?, ?, ?)').run(
-      3, '夏天的风带着花香，吹过田野和小路。蝉鸣声声，时光仿佛静止。', 1
+      diary3Id, '夏天的风带着花香，吹过田野和小路。蝉鸣声声，时光仿佛静止。', 1
     );
   }
 
   migrateOldUsers(db);
   migrateUserProfiles(db);
   migrateDiariesToUsers(db);
-  
+
   console.log('🔄 准备执行 pages 表迁移...');
   migratePagesUpdatedAt(db);
   console.log('✅ 所有迁移完成');
 
   migrateFavoritesTable(db);
+
+  // AI 设置字段迁移
+  migrateUserSettingsAI(db);
 
   return db;
 }
@@ -352,6 +361,66 @@ function migrateStaticFavorites(db, userId) {
     }
   } catch (error) {
     console.error('❌ 静态数据迁移失败:', error.message);
+  }
+}
+
+function migrateUserSettingsAI(db) {
+  try {
+    console.log('🔄 准备执行 user_settings 表 AI 字段迁移...');
+    const tableInfo = db.prepare('PRAGMA table_info(user_settings)').all();
+    const columns = tableInfo.map(col => col.name);
+
+    console.log('📋 user_settings 表当前字段:', columns);
+
+    // 添加 ai_enabled 字段
+    if (!columns.includes('ai_enabled')) {
+      console.log('⏳ 开始添加 ai_enabled 字段...');
+      db.exec('ALTER TABLE user_settings ADD COLUMN ai_enabled BOOLEAN DEFAULT 0');
+      console.log('✅ ai_enabled 字段添加成功');
+    } else {
+      console.log('✅ ai_enabled 字段已存在，跳过迁移');
+    }
+
+    // 添加 ai_reflection_enabled 字段
+    if (!columns.includes('ai_reflection_enabled')) {
+      console.log('⏳ 开始添加 ai_reflection_enabled 字段...');
+      db.exec('ALTER TABLE user_settings ADD COLUMN ai_reflection_enabled BOOLEAN DEFAULT 0');
+      console.log('✅ ai_reflection_enabled 字段添加成功');
+    } else {
+      console.log('✅ ai_reflection_enabled 字段已存在，跳过迁移');
+    }
+
+    // 添加 ai_weekly_review_enabled 字段
+    if (!columns.includes('ai_weekly_review_enabled')) {
+      console.log('⏳ 开始添加 ai_weekly_review_enabled 字段...');
+      db.exec('ALTER TABLE user_settings ADD COLUMN ai_weekly_review_enabled BOOLEAN DEFAULT 0');
+      console.log('✅ ai_weekly_review_enabled 字段添加成功');
+    } else {
+      console.log('✅ ai_weekly_review_enabled 字段已存在，跳过迁移');
+    }
+
+    // 添加 ai_emotion_trend_enabled 字段
+    if (!columns.includes('ai_emotion_trend_enabled')) {
+      console.log('⏳ 开始添加 ai_emotion_trend_enabled 字段...');
+      db.exec('ALTER TABLE user_settings ADD COLUMN ai_emotion_trend_enabled BOOLEAN DEFAULT 0');
+      console.log('✅ ai_emotion_trend_enabled 字段添加成功');
+    } else {
+      console.log('✅ ai_emotion_trend_enabled 字段已存在，跳过迁移');
+    }
+
+    // 验证迁移结果
+    const newTableInfo = db.prepare('PRAGMA table_info(user_settings)').all();
+    const newColumns = newTableInfo.map(col => col.name);
+    console.log('📋 user_settings 表迁移后字段:', newColumns);
+
+    // 检查数据
+    const sampleData = db.prepare('SELECT id, ai_enabled, ai_reflection_enabled, ai_weekly_review_enabled, ai_emotion_trend_enabled FROM user_settings LIMIT 3').all();
+    console.log('📊 AI 设置示例数据:', sampleData);
+
+    console.log('✅ AI 设置字段迁移完成');
+  } catch (error) {
+    console.error('❌ AI 设置字段迁移失败:', error.message);
+    console.error('❌ 错误堆栈:', error.stack);
   }
 }
 

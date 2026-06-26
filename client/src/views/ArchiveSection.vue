@@ -1,11 +1,14 @@
 <script setup>
-import { onMounted, computed, ref } from 'vue'
+import { onMounted, computed, ref, inject } from 'vue'
 import { useDiaryStore } from '@/stores/diary'
 import { useRouter } from 'vue-router'
 
 const store = useDiaryStore()
 const router = useRouter()
 const searchQuery = ref('')
+
+// 从父级 ReflectionView 注入翻页方法
+const flipToGarden = inject('flipToGarden', null)
 
 onMounted(() => {
   store.loadDiaries()
@@ -46,6 +49,15 @@ const stats = computed(() => ({
 function goBack() {
   router.push('/')
 }
+
+// 触发翻页到心灵花园
+async function handleExploreGarden() {
+  if (flipToGarden) {
+    await flipToGarden()
+  } else {
+    router.push('/reflection/garden')
+  }
+}
 </script>
 
 <template>
@@ -81,12 +93,12 @@ function goBack() {
 
     <main class="flex-1 w-full overflow-hidden relative">
       <div class="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/5 pointer-events-none"></div>
-      
+
       <div class="max-w-6xl mx-auto px-6 py-12 relative z-10 h-full">
         <header class="mb-16">
           <span class="font-label text-xs uppercase tracking-[0.3em] text-primary/40 mb-2 block">Library of Memories</span>
           <h1 class="font-headline text-5xl font-bold text-primary tracking-tighter leading-tight">时光之书</h1>
-          
+
           <div class="mt-6 flex items-center gap-4">
             <a class="inline-flex items-center gap-2 group px-4 py-2 bg-primary/5 hover:bg-primary/10 rounded-full transition-all duration-300" href="#">
               <span class="material-symbols-outlined text-primary/60 group-hover:text-primary text-sm">timeline</span>
@@ -145,13 +157,13 @@ function goBack() {
               <div class="absolute inset-0 bg-inverse-surface/5 pointer-events-none"></div>
               <div class="absolute top-0 left-0 right-0 h-[1px] bg-surface/30"></div>
             </div>
-            <div class="mt-4 font-label text-[10px] uppercase tracking-widest text-primary/40 pl-4">存档日记</div>
+            <div class="mt-4 font-label text-[10px] uppercase tracking-widest text-primary/40 pl-4">回望日记</div>
           </div>
 
           <div v-else class="text-center py-20">
             <span class="material-symbols-outlined text-6xl text-outline-variant mb-4">inventory_2</span>
-            <p class="font-headline text-xl text-on-surface-variant">存档为空</p>
-            <p class="font-label text-sm text-on-surface-variant/70 mt-2">还没有存档的日记</p>
+            <p class="font-headline text-xl text-on-surface-variant">书架空空如也</p>
+            <p class="font-label text-sm text-on-surface-variant/70 mt-2">还没有回望的日记</p>
           </div>
         </div>
 
@@ -166,6 +178,23 @@ function goBack() {
             <span class="font-label text-[10px] uppercase tracking-widest text-primary/40">Collections</span>
           </div>
         </div>
+      </div>
+
+      <!-- 探索花园按钮（右下角） -->
+      <div class="fixed bottom-12 right-12 z-20 group">
+        <!-- 微细提示 -->
+        <div class="absolute -top-10 right-0 opacity-40 group-hover:opacity-100 transition-opacity">
+          <span class="font-label text-[10px] uppercase tracking-[0.3em] text-primary whitespace-nowrap">
+            翻开日记，探索内心
+          </span>
+        </div>
+        <button
+          @click="handleExploreGarden"
+          class="flex items-center gap-2 px-6 py-4 bg-primary text-on-primary rounded-full shadow-lg shadow-primary/30 hover:scale-95 transition-all"
+        >
+          <span class="material-symbols-outlined text-xl group-hover:animate-pulse">auto_stories</span>
+          <span class="font-label text-sm uppercase tracking-widest">探索花园</span>
+        </button>
       </div>
 
       <div class="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-40 hover:opacity-100 transition-opacity">

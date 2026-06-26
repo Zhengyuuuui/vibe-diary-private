@@ -1,6 +1,11 @@
 const jwt = require('jsonwebtoken');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+// 移除硬编码默认值，强制要求环境变量
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET) {
+  throw new Error('JWT_SECRET 环境变量未设置，服务拒绝启动。请在 .env 文件中设置 JWT_SECRET。');
+}
 
 function authMiddleware(req, res, next) {
   const authHeader = req.headers.authorization;

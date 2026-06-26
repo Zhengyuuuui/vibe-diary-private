@@ -15,9 +15,27 @@ const routes = [
   },
   {
     path: '/archive',
-    name: 'Archive',
-    component: () => import('@/views/ArchiveView.vue'),
-    meta: { requiresAuth: true }
+    redirect: '/reflection'
+  },
+  {
+    path: '/reflection',
+    name: 'Reflection',
+    component: () => import('@/views/ReflectionView.vue'),
+    meta: { requiresAuth: true },
+    children: [
+      {
+        path: '',
+        name: 'ArchiveSection',
+        component: () => import('@/views/ArchiveSection.vue'),
+        meta: { requiresAuth: true, page: 1 }
+      },
+      {
+        path: 'garden',
+        name: 'GardenSection',
+        component: () => import('@/views/GardenSection.vue'),
+        meta: { requiresAuth: true, page: 2 }
+      }
+    ]
   },
   {
     path: '/favorites',

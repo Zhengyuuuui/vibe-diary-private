@@ -34,6 +34,7 @@ onMounted(async () => {
   if (isLoggedIn.value) {
     await loadProfile()
     await loadSettings()
+    await settingsStore.loadAISettings() // 新增：加载 AI 设置
   }
   isLoading.value = false
 })
@@ -154,6 +155,23 @@ function updateTheme(value) {
   settingsStore.theme = value
   settingsStore.applySettings()
 }
+
+// 新增：AI 设置相关函数
+async function toggleAIEnabled() {
+  await settingsStore.toggleAIEnabled()
+}
+
+async function toggleAIReflection() {
+  await settingsStore.toggleAIReflection()
+}
+
+async function toggleAIWeeklyReview() {
+  await settingsStore.toggleAIWeeklyReview()
+}
+
+async function toggleAIEmotionTrend() {
+  await settingsStore.toggleAIEmotionTrend()
+}
 </script>
 
 <template>
@@ -168,7 +186,7 @@ function updateTheme(value) {
       <div class="flex items-center gap-6">
         <div class="hidden md:flex gap-8 items-center">
           <a href="/" class="text-primary/60 hover:text-primary transition-colors duration-300 font-label text-xs uppercase tracking-widest">首页</a>
-          <a href="/archive" class="text-primary/60 hover:text-primary transition-colors duration-300 font-label text-xs uppercase tracking-widest">存档</a>
+          <a href="/reflection" class="text-primary/60 hover:text-primary transition-colors duration-300 font-label text-xs uppercase tracking-widest">回望</a>
           <a href="/favorites" class="text-primary/60 hover:text-primary transition-colors duration-300 font-label text-xs uppercase tracking-widest">灵感</a>
           <a href="#" class="text-primary font-bold font-label text-xs uppercase tracking-widest">设置</a>
         </div>
@@ -379,6 +397,117 @@ function updateTheme(value) {
         </div>
       </section>
 
+      <!-- 新增：隐私与 AI 设置区域 -->
+      <section class="mb-16">
+        <h3 class="font-label text-[10px] uppercase tracking-[0.2em] text-outline mb-8">
+          隐私与 AI • Privacy & AI
+        </h3>
+
+        <div class="bg-surface-container-low rounded-xl p-8 space-y-6">
+          <!-- AI 总开关 -->
+          <div class="flex items-center justify-between">
+            <div>
+              <h4 class="font-headline text-lg text-primary">AI 功能总开关</h4>
+              <p class="font-body text-sm text-on-surface-variant">
+                默认关闭,开启后可使用 AI 辅助功能
+              </p>
+            </div>
+            <button
+              @click="toggleAIEnabled"
+              :class="[
+                'w-12 h-12 rounded-full flex items-center justify-center transition-all cursor-pointer',
+                settingsStore.aiSettings.ai_enabled
+                  ? 'bg-primary text-on-primary'
+                  : 'bg-surface-container-highest border border-primary/20 text-primary'
+              ]"
+            >
+              <span class="material-symbols-outlined">
+                {{ settingsStore.aiSettings.ai_enabled ? 'check' : 'close' }}
+              </span>
+            </button>
+          </div>
+
+          <!-- AI Reflection 开关 -->
+          <div v-if="settingsStore.aiSettings.ai_enabled" class="flex items-center justify-between">
+            <div>
+              <h4 class="font-headline text-lg text-primary">AI Reflection</h4>
+              <p class="font-body text-sm text-on-surface-variant">
+                分析最近 7 天的日记内容
+              </p>
+            </div>
+            <button
+              @click="toggleAIReflection"
+              :class="[
+                'w-12 h-12 rounded-full flex items-center justify-center transition-all cursor-pointer',
+                settingsStore.aiSettings.ai_reflection_enabled
+                  ? 'bg-primary text-on-primary'
+                  : 'bg-surface-container-highest border border-primary/20 text-primary'
+              ]"
+            >
+              <span class="material-symbols-outlined">
+                {{ settingsStore.aiSettings.ai_reflection_enabled ? 'check' : 'close' }}
+              </span>
+            </button>
+          </div>
+
+          <!-- AI Weekly Review 开关 -->
+          <div v-if="settingsStore.aiSettings.ai_enabled" class="flex items-center justify-between">
+            <div>
+              <h4 class="font-headline text-lg text-primary">AI Weekly Review</h4>
+              <p class="font-body text-sm text-on-surface-variant">
+                生成每周生活回顾
+              </p>
+            </div>
+            <button
+              @click="toggleAIWeeklyReview"
+              :class="[
+                'w-12 h-12 rounded-full flex items-center justify-center transition-all cursor-pointer',
+                settingsStore.aiSettings.ai_weekly_review_enabled
+                  ? 'bg-primary text-on-primary'
+                  : 'bg-surface-container-highest border border-primary/20 text-primary'
+              ]"
+            >
+              <span class="material-symbols-outlined">
+                {{ settingsStore.aiSettings.ai_weekly_review_enabled ? 'check' : 'close' }}
+              </span>
+            </button>
+          </div>
+
+          <!-- AI 情绪趋势开关 -->
+          <div v-if="settingsStore.aiSettings.ai_enabled" class="flex items-center justify-between">
+            <div>
+              <h4 class="font-headline text-lg text-primary">情绪趋势分析</h4>
+              <p class="font-body text-sm text-on-surface-variant">
+                观察长期状态变化
+              </p>
+            </div>
+            <button
+              @click="toggleAIEmotionTrend"
+              :class="[
+                'w-12 h-12 rounded-full flex items-center justify-center transition-all cursor-pointer',
+                settingsStore.aiSettings.ai_emotion_trend_enabled
+                  ? 'bg-primary text-on-primary'
+                  : 'bg-surface-container-highest border border-primary/20 text-primary'
+              ]"
+            >
+              <span class="material-symbols-outlined">
+                {{ settingsStore.aiSettings.ai_emotion_trend_enabled ? 'check' : 'close' }}
+              </span>
+            </button>
+          </div>
+
+          <!-- 隐私说明 -->
+          <div class="mt-8 p-4 bg-surface-container rounded-lg">
+            <p class="font-body text-xs text-on-surface-variant leading-relaxed">
+              <strong class="text-primary">隐私承诺：</strong>
+              Vibe Diary 默认不会分析任何日记内容。
+              只有您主动开启后,才会将您选择的内容发送给 AI。
+              您可以随时关闭 AI 功能,关闭后产品依然完整可用。
+            </p>
+          </div>
+        </div>
+      </section>
+
       <div class="flex justify-end gap-6 pt-12">
         <button
           @click="resetDefaults"
@@ -401,9 +530,9 @@ function updateTheme(value) {
         <span class="material-symbols-outlined">auto_stories</span>
         <span class="font-label text-[10px] uppercase tracking-widest">首页</span>
       </a>
-      <a href="/archive" class="flex flex-col items-center justify-center text-primary/40 hover:text-primary transition-all">
+      <a href="/reflection" class="flex flex-col items-center justify-center text-primary/40 hover:text-primary transition-all">
         <span class="material-symbols-outlined">inventory_2</span>
-        <span class="font-label text-[10px] uppercase tracking-widest">存档</span>
+        <span class="font-label text-[10px] uppercase tracking-widest">回望</span>
       </a>
       <a href="/favorites" class="flex flex-col items-center justify-center text-primary/40 hover:text-primary transition-all">
         <span class="material-symbols-outlined">star</span>

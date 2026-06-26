@@ -4,13 +4,18 @@ const { authMiddleware } = require('../middleware/auth');
 const router = Router();
 
 router.get('/:diaryId', authMiddleware, (req, res) => {
-  const db = req.db;
-  const diary = db.prepare('SELECT * FROM diaries WHERE id = ? AND user_id = ?').get(req.params.diaryId, req.user.id);
-  if (!diary) {
-    return res.status(404).json({ code: 404, msg: '日记本不存在或无权访问', data: null });
+  try {
+    const db = req.db;
+    const diary = db.prepare('SELECT * FROM diaries WHERE id = ? AND user_id = ?').get(req.params.diaryId, req.user.id);
+    if (!diary) {
+      return res.status(404).json({ code: 404, msg: '日记本不存在或无权访问', data: null });
+    }
+    const pages = db.prepare('SELECT * FROM pages WHERE diary_id = ? ORDER BY page_num').all(req.params.diaryId);
+    res.json({ code: 200, msg: '操作成功', data: pages });
+  } catch (error) {
+    console.error('获取页面列表失败:', error);
+    res.status(500).json({ code: 500, msg: '获取失败', data: null });
   }
-  const pages = db.prepare('SELECT * FROM pages WHERE diary_id = ? ORDER BY page_num').all(req.params.diaryId);
-  res.json({ code: 200, msg: '操作成功', data: pages });
 });
 
 router.post('/:diaryId', authMiddleware, (req, res) => {

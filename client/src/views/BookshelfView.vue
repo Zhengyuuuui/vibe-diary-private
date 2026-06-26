@@ -2,11 +2,13 @@
 import { onMounted, onUnmounted, ref, computed } from 'vue'
 import { useDiaryStore } from '@/stores/diary'
 import { useAuthStore } from '@/stores/auth'
+import { useSettingsStore } from '@/stores/settings'
 import { useRouter } from 'vue-router'
 import { getStats, getRandomFragment, getOnThisDay } from '@/api'
 
 const store = useDiaryStore()
 const authStore = useAuthStore()
+const settingsStore = useSettingsStore()
 const router = useRouter()
 const showNewDialog = ref(false)
 const showEditDialog = ref(false)
@@ -200,6 +202,7 @@ onMounted(async () => {
   await store.loadDiaries()
   await authStore.loadProfile()
   await loadStats()
+  await settingsStore.loadAISettings() // 新增：加载 AI 设置
   loadTodayMood()
   await loadMemoryFragment()
   await loadOnThisDay()
@@ -267,6 +270,11 @@ function getBookStyle(index) {
     width: bookWidths[index % bookWidths.length]
   }
 }
+
+// 新增：跳转到设置页面
+function goToSettings() {
+  router.push('/settings')
+}
 </script>
 
 <template>
@@ -276,7 +284,7 @@ function getBookStyle(index) {
         <div class="text-2xl font-headline text-on-surface tracking-tighter">氛围日记</div>
         <div class="hidden md:flex items-center space-x-8 font-label uppercase tracking-wider text-xs">
           <router-link to="/" class="text-on-surface font-semibold border-b-0 hover:text-on-surface transition-colors duration-300">首页</router-link>
-          <router-link to="/archive" class="text-on-surface-variant hover:text-on-surface transition-colors duration-300">存档</router-link>
+          <router-link to="/reflection" class="text-on-surface-variant hover:text-on-surface transition-colors duration-300">回望</router-link>
           <router-link to="/favorites" class="text-on-surface-variant hover:text-on-surface transition-colors duration-300">灵感</router-link>
           <router-link to="/settings" class="text-on-surface-variant hover:text-on-surface transition-colors duration-300">设置</router-link>
         </div>
@@ -295,6 +303,27 @@ function getBookStyle(index) {
       </div>
     </header>
 
+    <!-- 新增：AI 功能提示（仅在 AI 关闭且用户登录时显示） -->
+    <div
+      v-if="!settingsStore.aiSettings.ai_enabled && authStore.isLoggedIn"
+      class="max-w-7xl mx-auto px-6 py-4 mb-6"
+    >
+      <div class="bg-surface-container-low rounded-lg flex items-center justify-between px-6 py-3">
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-primary text-xl">tips_and_updates</span>
+          <p class="font-body text-sm text-on-surface">
+            AI 功能可用,可在设置中开启
+          </p>
+        </div>
+        <button
+          @click="goToSettings"
+          class="font-label text-xs uppercase tracking-widest text-primary hover:underline cursor-pointer"
+        >
+          前往设置
+        </button>
+      </div>
+    </div>
+
     <div class="flex max-w-7xl mx-auto">
       <aside class="bg-surface-container w-64 hidden md:flex flex-col h-screen p-4 space-y-6">
         <div class="px-2 py-4">
@@ -306,9 +335,9 @@ function getBookStyle(index) {
             <span class="material-symbols-outlined">auto_stories</span>
             <span class="font-label text-xs font-medium">首页</span>
           </router-link>
-          <router-link to="/archive" class="flex items-center space-x-3 p-3 text-on-surface-variant hover:bg-surface-container-high/30 transition-all">
+          <router-link to="/reflection" class="flex items-center space-x-3 p-3 text-on-surface-variant hover:bg-surface-container-high/30 transition-all">
             <span class="material-symbols-outlined">inventory_2</span>
-            <span class="font-label text-xs font-medium">存档</span>
+            <span class="font-label text-xs font-medium">回望</span>
           </router-link>
           <router-link to="/favorites" class="flex items-center space-x-3 p-3 text-on-surface-variant hover:bg-surface-container-high/30 transition-all">
             <span class="material-symbols-outlined">bookmark</span>
@@ -505,7 +534,7 @@ function getBookStyle(index) {
             <div class="bg-surface-container-low p-6 rounded-xl border border-primary/5">
               <div class="flex items-center justify-between mb-4">
                 <h3 class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant">最近书写</h3>
-                <router-link to="/archive" class="text-xs font-label font-bold text-primary hover:underline flex items-center gap-1">
+                <router-link to="/reflection" class="text-xs font-label font-bold text-primary hover:underline flex items-center gap-1">
                   <span class="material-symbols-outlined text-sm">history_edu</span>
                   继续书写 →
                 </router-link>
@@ -742,9 +771,9 @@ function getBookStyle(index) {
         <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">auto_stories</span>
         <span class="font-label text-[10px] uppercase tracking-widest mt-1">首页</span>
       </router-link>
-      <router-link to="/archive" class="flex flex-col items-center justify-center text-primary/40 hover:text-primary transition-all">
+      <router-link to="/reflection" class="flex flex-col items-center justify-center text-primary/40 hover:text-primary transition-all">
         <span class="material-symbols-outlined">inventory_2</span>
-        <span class="font-label text-[10px] uppercase tracking-widest mt-1">存档</span>
+        <span class="font-label text-[10px] uppercase tracking-widest mt-1">回望</span>
       </router-link>
       <router-link to="/favorites" class="flex flex-col items-center justify-center text-primary/40 hover:text-primary transition-all">
         <span class="material-symbols-outlined">star</span>

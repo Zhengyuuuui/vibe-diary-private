@@ -186,3 +186,16 @@ export function uploadFavoriteImage(formData) {
       return json.data
     })
 }
+
+// 新增：获取 AI 设置状态
+export function getAISettings() {
+  return request('/settings/ai')
+}
+
+// 新增：更新 AI 设置状态
+export function updateAISettings(data) {
+  return request('/settings/ai', {
+    method: 'PUT',
+    body: JSON.stringify(data)
+  })
+}
