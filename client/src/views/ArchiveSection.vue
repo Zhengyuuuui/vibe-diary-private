@@ -7,7 +7,8 @@ const store = useDiaryStore()
 const router = useRouter()
 const searchQuery = ref('')
 const showMobileSearch = ref(false) // 🆕 手机端搜索框显示状态
-
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || ''
+const API_BASE = `${API_BASE_URL}/api/v1`
 // 从父级 ReflectionView 注入翻页方法
 const flipToGarden = inject('flipToGarden', null)
 
@@ -29,7 +30,7 @@ const milestoneStats = ref({
 async function loadMilestoneStats() {
   try {
     const token = localStorage.getItem('token')
-    const response = await fetch('/api/v1/diaries/stats', {
+    const response = await fetch(`${API_BASE}/diaries/stats`, {
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
@@ -199,12 +200,12 @@ async function handleExploreGarden() {
         <span class="text-lg md:text-xl font-bold text-primary font-headline tracking-tight">氛围日记</span>
       </div>
       <!-- 手机端隐藏导航链接 -->
-      <div class="hidden md:flex items-center gap-8">
-        <a href="/" class="text-primary/60 hover:text-primary transition-colors duration-300 font-label text-sm">首页</a>
-        <a href="#" class="text-primary font-bold hover:text-primary transition-colors duration-300 font-label text-sm">回望</a>
-        <a href="/favorites" class="text-primary/60 hover:text-primary transition-colors duration-300 font-label text-sm">灵感</a>
-        <a href="/settings" class="text-primary/60 hover:text-primary transition-colors duration-300 font-label text-sm">设置</a>
-      </div>
+     <div class="hidden md:flex items-center gap-8">
+  <router-link to="/" class="text-primary/60 hover:text-primary transition-colors duration-300 font-label text-sm">首页</router-link>
+  <router-link to="/reflection" class="text-primary font-bold hover:text-primary transition-colors duration-300 font-label text-sm">回望</router-link>
+  <router-link to="/favorites" class="text-primary/60 hover:text-primary transition-colors duration-300 font-label text-sm">灵感</router-link>
+  <router-link to="/settings" class="text-primary/60 hover:text-primary transition-colors duration-300 font-label text-sm">设置</router-link>
+</div>
       <!-- 手机端只显示搜索图标按钮，电脑端显示完整搜索框 -->
       <div class="flex items-center gap-2 md:gap-3">
         <!-- 手机端：搜索图标按钮 -->
@@ -469,23 +470,23 @@ async function handleExploreGarden() {
     </div>
 
     <nav class="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-md z-50 flex justify-around items-center py-3 px-4 bg-surface-90 backdrop-blur-lg rounded-full shadow-lg">
-      <a href="/" class="flex flex-col items-center justify-center text-primary/40 hover:text-primary transition-all">
-        <span class="material-symbols-outlined">auto_stories</span>
-        <span class="font-label text-[10px] uppercase tracking-widest mt-1">首页</span>
-      </a>
-      <a href="#" class="flex flex-col items-center justify-center text-primary scale-110">
-        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">inventory_2</span>
-        <span class="font-label text-[10px] uppercase tracking-widest mt-1">回望</span>
-      </a>
-      <a href="/favorites" class="flex flex-col items-center justify-center text-primary/40 hover:text-primary transition-all">
-        <span class="material-symbols-outlined">star</span>
-        <span class="font-label text-[10px] uppercase tracking-widest mt-1">灵感</span>
-      </a>
-      <a href="/settings" class="flex flex-col items-center justify-center text-primary/40 hover:text-primary transition-all">
-        <span class="material-symbols-outlined">settings</span>
-        <span class="font-label text-[10px] uppercase tracking-widest mt-1">设置</span>
-      </a>
-    </nav>
+  <router-link to="/" class="flex flex-col items-center justify-center text-primary/40 hover:text-primary transition-all">
+    <span class="material-symbols-outlined">auto_stories</span>
+    <span class="font-label text-[10px] uppercase tracking-widest mt-1">首页</span>
+  </router-link>
+  <router-link to="/reflection" class="flex flex-col items-center justify-center text-primary scale-110">
+    <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">inventory_2</span>
+    <span class="font-label text-[10px] uppercase tracking-widest mt-1">回望</span>
+  </router-link>
+  <router-link to="/favorites" class="flex flex-col items-center justify-center text-primary/40 hover:text-primary transition-all">
+    <span class="material-symbols-outlined">star</span>
+    <span class="font-label text-[10px] uppercase tracking-widest mt-1">灵感</span>
+  </router-link>
+  <router-link to="/settings" class="flex flex-col items-center justify-center text-primary/40 hover:text-primary transition-all">
+    <span class="material-symbols-outlined">settings</span>
+    <span class="font-label text-[10px] uppercase tracking-widest mt-1">设置</span>
+  </router-link>
+</nav>
   </div>
 </template>
 
