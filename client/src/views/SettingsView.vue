@@ -230,10 +230,10 @@ async function toggleAIEmotionTrend() {
       </div>
       <div class="flex items-center gap-6">
         <div class="hidden md:flex gap-8 items-center">
-          <a href="/" class="text-primary/60 hover:text-primary transition-colors duration-300 font-label text-xs uppercase tracking-widest">首页</a>
-          <a href="/reflection" class="text-primary/60 hover:text-primary transition-colors duration-300 font-label text-xs uppercase tracking-widest">回望</a>
-          <a href="/favorites" class="text-primary/60 hover:text-primary transition-colors duration-300 font-label text-xs uppercase tracking-widest">灵感</a>
-          <a href="#" class="text-primary font-bold font-label text-xs uppercase tracking-widest">设置</a>
+          <router-link to="/" class="text-primary/60 hover:text-primary transition-colors duration-300 font-label text-xs uppercase tracking-widest">首页</router-link>
+          <router-link to="/reflection" class="text-primary/60 hover:text-primary transition-colors duration-300 font-label text-xs uppercase tracking-widest">回望</router-link>
+          <router-link to="/favorites" class="text-primary/60 hover:text-primary transition-colors duration-300 font-label text-xs uppercase tracking-widest">灵感</router-link>
+          <router-link to="/settings" class="text-primary font-bold font-label text-xs uppercase tracking-widest">设置</router-link>
         </div>
         <div class="flex gap-4">
           <!-- 信箱图标 + 红点 -->
@@ -646,22 +646,22 @@ async function toggleAIEmotionTrend() {
     </main>
 
     <nav class="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-md z-50 flex justify-around items-center py-3 px-4 bg-surface-90 backdrop-blur-lg rounded-full shadow-[0_20_40px_rgba(105,93,74,0.06)]">
-      <a href="/" class="flex flex-col items-center justify-center text-primary/40 hover:text-primary transition-all">
+      <router-link to="/" class="flex flex-col items-center justify-center text-primary/40 hover:text-primary transition-all">
         <span class="material-symbols-outlined">auto_stories</span>
         <span class="font-label text-[10px] uppercase tracking-widest mt-1">首页</span>
-      </a>
-      <a href="/reflection" class="flex flex-col items-center justify-center text-primary/40 hover:text-primary transition-all">
+      </router-link>
+      <router-link to="/reflection" class="flex flex-col items-center justify-center text-primary/40 hover:text-primary transition-all">
         <span class="material-symbols-outlined">inventory_2</span>
         <span class="font-label text-[10px] uppercase tracking-widest mt-1">回望</span>
-      </a>
-      <a href="/favorites" class="flex flex-col items-center justify-center text-primary/40 hover:text-primary transition-all">
+      </router-link>
+      <router-link to="/favorites" class="flex flex-col items-center justify-center text-primary/40 hover:text-primary transition-all">
         <span class="material-symbols-outlined">star</span>
         <span class="font-label text-[10px] uppercase tracking-widest mt-1">灵感</span>
-      </a>
-      <a href="#" class="flex flex-col items-center justify-center text-primary scale-110 active:scale-90 duration-200">
+      </router-link>
+      <router-link to="/settings" class="flex flex-col items-center justify-center text-primary scale-110 active:scale-90 duration-200">
         <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">settings</span>
         <span class="font-label text-[10px] uppercase tracking-widest mt-1">设置</span>
-      </a>
+      </router-link>
     </nav>
 
     <!-- 消息中心弹窗 -->
