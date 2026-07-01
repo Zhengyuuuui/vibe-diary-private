@@ -4,6 +4,7 @@ emoji: 📖
 colorFrom: pink
 colorTo: purple
 sdk: static
+app_file: index.html
 pinned: false
 ---
 
