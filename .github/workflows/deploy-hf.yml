@@ -25,7 +25,7 @@ jobs:
       - name: Build Vue
         working-directory: client
         env:
-          VITE_API_BASE_URL: https://vibe-diary-proxy-5njrqkmkz5qc.zysgm123.deno.net/api/v1/auth/login
+          VITE_API_BASE_URL: https://vibe-diary-proxy-5njrqkmkz5qc.zysgm123.deno.net
         run: npm run build
 
       - name: Install Hugging Face Hub
