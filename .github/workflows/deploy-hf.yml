@@ -35,6 +35,8 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
+          cp client/hf-readme.md client/dist/README.md
+
           python - <<'PY'
           import os
           from huggingface_hub import HfApi
