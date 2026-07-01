@@ -26,12 +26,20 @@ jobs:
         working-directory: client
         run: npm run build
 
-      - name: Deploy to Hugging Face
-        uses: nateraw/huggingface-sync-action@v0.0.5
-        with:
-          github_repo_id: Zhengyuuuui/vibe-diary-private
-          huggingface_repo_id: realyuYU/Vibe-diary
-          hf_token: ${{ secrets.HF_TOKEN }}
-          repo_type: space
-          space_sdk: static
-          local_dir: client/dist
+      - name: Deploy to Hugging Face Space
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          cd client/dist
+
+          git init
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+
+          git add .
+          git commit -m "Deploy to Hugging Face Space"
+
+          git branch -M main
+          git remote add origin https://Zhengyuuuui:${HF_TOKEN}@huggingface.co/spaces/realyuYU/Vibe-diary
+
+          git push -f origin main
