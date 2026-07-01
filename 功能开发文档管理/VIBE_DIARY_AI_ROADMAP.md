@@ -1,6 +1,7 @@
 # Vibe Diary AI Roadmap
 
-更新时间：2026-06-25
+更新时间：2026-06-27
+最后审计：2026-06-27
 
 ---
 
@@ -114,6 +115,147 @@ privacy_mode BOOLEAN DEFAULT 1
 
 状态：推荐首个 AI 功能
 
+### 后端开发进度
+
+✅ **后端已完成（2026-06-27）**
+
+**已完成的功能**：
+- ✅ DeepSeek API Key 配置（server/.env）
+- ✅ AI 服务模块（server/services/ai-service.js）
+- ✅ AI Reflection 端点（POST /api/v1/ai/reflection）
+- ✅ AI 设置验证（检查 ai_enabled 和 ai_reflection_enabled）
+- ✅ 数据库查询（获取最近 7 天日记内容）
+- ✅ 降级方案（AI 服务失败时返回友好提示）
+- ✅ 异常处理（try-catch）
+- ✅ 用户隔离（authMiddleware）
+- ✅ 用户自定义 API Key 功能（加密存储）
+- ✅ API Key 加密工具（AES-256）
+- ✅ API Key 端点（GET/PUT/DELETE /api/v1/settings/ai-api-key）
+- ✅ **多供应商支持（OpenAI、Anthropic、DeepSeek）**
+- ✅ **每日缓存机制（2026-06-28 完成）**
+- ✅ **供应商类型字段（ai_provider，默认 deepseek）**
+- ✅ **OpenAI 和 Anthropic API 调用模块**
+- ✅ **供应商类型端点扩展（settings.js、ai.js）**
+
+**测试结果**：
+- ✅ AI Reflection API 正常工作
+- ✅ AI 设置验证正常
+- ✅ 数据库查询正常
+- ✅ 降级方案正常
+- ✅ 用户自定义 API Key 功能正常
+- ✅ API Key 加密解密正常
+- ✅ API Key 端点正常
+- ✅ **多供应商功能正常（GET/PUT settings/ai 返回 ai_provider 字段）**
+- ✅ **供应商类型更新正常（从 deepseek 更新到 openai/anthropic）**
+
+**审计结果（2026-06-27）**：
+- ✅ **审计结论：通过（有条件）**
+- ✅ **数据库迁移正确**
+- ✅ **多供应商 API 调用完整**
+- ✅ **供应商选择逻辑正确**
+- ✅ **安全性符合要求**
+- ✅ **产品原则符合要求**
+
+**审计发现的问题**：
+- ✅ **问题1（已修复）**：错误提示硬编码供应商名称
+  - **修复位置**：ai-service.js#L31, ai.js#L76
+  - **修复方案**：将硬编码 "DeepSeek API Key" 改为通用 "API Key"
+  - **修复时间**：2026-06-27
+- ✅ **问题2（已修复）**：降级方案数据结构不一致
+  - **修复位置**：ai-service.js#L190-L196
+  - **修复方案**：统一降级返回数据结构（添加 fallback 字段，使用 reflection 替代 fallback_message）
+  - **修复时间**：2026-06-27
+- ✅ **问题3（已处理）**：多供应商 API Key 支持策略不一致
+  - **处理方案**：已在 AI Roadmap 中文档说明策略差异
+  - **处理时间**：2026-06-27
+- ✅ **问题4（已修复）**：.env 缺少环境变量示例
+  - **修复位置**：server/.env
+  - **修复方案**：补充注释说明各供应商 API Key 配置策略
+  - **修复时间**：2026-06-27
+
+**待完成的功能**：
+- ⏳ 前端集成（前端已完成，需要对接 API）
+
+**功能状态**：
+- ✅ **多供应商支持功能已上线就绪**（所有审计问题已修复）
+
+---
+
+### 用户自定义 API Key 功能
+
+**目的**：项目公开后，开发者无需承担用户 AI 调用费用。
+
+**功能说明**：
+- 用户可以在设置中配置自己的 AI API Key（支持 DeepSeek、OpenAI、Anthropic）
+- API Key 加密存储（AES-256），安全性高
+- 不验证 API Key 有效性，用户自行确保
+- 用户未配置 API Key 时提示"请先配置 AI API Key"
+
+**多供应商 API Key 策略**：
+- **DeepSeek**：支持用户自定义 API Key 或服务器级 DEEPSEEK_API_KEY 环境变量
+- **OpenAI/Anthropic**：仅支持用户自定义 API Key，不支持服务器级配置
+- **原因**：避免开发者承担用户 AI 调用费用，确保项目公开后可持续运营
+- **注意**：用户切换供应商后，需重新配置对应的 API Key
+
+**API 端点**：
+
+```
+GET /api/v1/settings/ai-api-key
+PUT /api/v1/settings/ai-api-key
+DELETE /api/v1/settings/ai-api-key
+```
+
+**加密方式**：
+- 算法：AES-256-CBC
+- 密钥：从环境变量 ENCRYPTION_KEY 读取
+- 存储：加密后的 API Key 存储在数据库
+
+**注意事项**：
+- 需要在 server/.env 文件中配置 ENCRYPTION_KEY
+- 用户配置 API Key 后，AI Reflection 会使用用户自定义的 API Key
+- 用户删除 API Key 后，需要重新配置才能使用 AI 功能
+
+---
+
+**后端 API 端点**：
+
+```
+POST /api/v1/ai/reflection
+```
+
+**请求头**：
+```
+Authorization: Bearer <token>
+```
+
+**返回示例**：
+```json
+{
+  "code": 200,
+  "msg": "分析成功",
+  "data": {
+    "reflection": "AI 分析结果",
+    "model": "deepseek-chat",
+    "usage": {
+      "prompt_tokens": 123,
+      "completion_tokens": 456,
+      "total_tokens": 579
+    },
+    "has_content": true,
+    "pages_count": 5
+  }
+}
+```
+
+---
+
+**注意事项**：
+- 需要在 server/.env 文件中配置实际的 DEEPSEEK_API_KEY
+- 默认关闭 AI 功能，需要用户在设置中开启
+- 日记内容长度限制为 3000 字，避免发送过多数据给 AI
+
+---
+
 目标：
 
 帮助用户回顾最近一段时间的自己。
@@ -193,6 +335,8 @@ pages.content
 
 ## P2：AI 关键词提取
 
+状态：后端已完成
+
 目标：
 
 自动提取日记关键词。
@@ -213,6 +357,36 @@ pages.content
 
 ---
 
+### 后端开发进度
+
+✅ **后端已完成（2026-06-27）**
+
+**已完成的功能**：
+- ✅ AI Reflection API 已扩展，支持关键词提取
+- ✅ keywords 字段已添加到返回数据（最多5个关键词）
+- ✅ Prompt 已修改，让 AI 同时提取关键词和情绪趋势
+- ✅ 数据验证函数已添加，确保关键词数组格式正确
+
+**API 端点**：
+- `POST /api/v1/ai/reflection` - 返回数据包含 keywords 字段
+
+**返回数据示例**：
+```json
+{
+  "code": 200,
+  "msg": "分析成功",
+  "data": {
+    "keywords": ["压力", "美食", "雨景", "水彩画", "灰色世界"],
+    ...
+  }
+}
+```
+
+**待完成的功能**：
+- ⏳ 前端集成（关键词展示、标签搜索、趋势统计）
+
+---
+
 未来可用于：
 
 * 历史上的今天
@@ -223,6 +397,8 @@ pages.content
 ---
 
 ## P2：情绪趋势图
+
+状态：后端已完成
 
 目标：
 
@@ -241,6 +417,53 @@ pages.content
 
 兴奋 ████
 ```
+
+---
+
+### 后端开发进度
+
+✅ **后端已完成（2026-06-27）**
+
+**已完成的功能**：
+- ✅ AI Reflection API 已扩展，支持情绪趋势分析
+- ✅ emotion_trend 字段已添加到返回数据（统计6种情绪：calm、happy、sad、anxious、inspired、reflective）
+- ✅ Prompt 已修改，让 AI 分析日记中每种情绪的出现次数（0-10）
+- ✅ 数据验证函数已添加，确保情绪趋势数据格式正确
+
+**API 端点**：
+- `POST /api/v1/ai/reflection` - 返回数据包含 emotion_trend 字段
+
+**返回数据示例**：
+```json
+{
+  "code": 200,
+  "msg": "分析成功",
+  "data": {
+    "emotion_trend": {
+      "calm": 1,
+      "happy": 0,
+      "sad": 0,
+      "anxious": 1,
+      "inspired": 0,
+      "reflective": 2
+    },
+    ...
+  }
+}
+```
+
+**情绪状态说明**：
+- calm: 平静
+- happy: 开心
+- sad: 悲伤
+- anxious: 焦虑
+- inspired: 充满灵感
+- reflective: 深思
+
+**待完成的功能**：
+- ⏳ 前端集成（情绪趋势图展示、可视化图表）
+
+---
 
 不推荐：
 

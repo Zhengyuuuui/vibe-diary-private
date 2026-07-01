@@ -167,8 +167,34 @@ async function flipBackToArchive() {
   isFlipping.value = false
 }
 
+// 🆕 反向翻页：LetterSection → GardenSection（信箱返回花园）
+async function flipBackToGarden() {
+  if (isFlipping.value) return
+  isFlipping.value = true
+
+  // 1. 截取当前页面（LetterSection 整页内容）
+  const frontCanvas = await captureCurrentPage()
+
+  // 2. 显示翻页层，初始为完成态（progress=1，已翻到左侧）
+  await nextTick()
+  createFlipAnim(frontCanvas, 1)
+
+  // 3. 播放反向翻页（从左翻回右）
+  await pageFlipAnim.playBackward()
+
+  // 4. 路由跳转回花园页
+  router.push('/reflection/garden')
+  await nextTick()
+
+  // 5. 清理动画
+  destroyFlipAnim()
+  flipState.value = 'garden'
+  isFlipping.value = false
+}
+
 provide('flipToGarden', flipToGarden)
 provide('flipBackToArchive', flipBackToArchive)
+provide('flipBackToGarden', flipBackToGarden)
 provide('isFlipping', isFlipping)
 
 onBeforeUnmount(() => {

@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, watch } from 'vue'
-import { getSettings, updateSettings, getAISettings, updateAISettings } from '@/api'
+import { getSettings, updateSettings, getAISettings, updateAISettings, getAPIKey, updateAPIKey } from '@/api'
 
 export const useSettingsStore = defineStore('settings', () => {
   const fontSize = ref(16)
@@ -14,6 +14,18 @@ export const useSettingsStore = defineStore('settings', () => {
     ai_weekly_review_enabled: 0,
     ai_emotion_trend_enabled: 0
   })
+
+  // 新增：API Key 状态
+  const apiKey = ref('')
+  const hasAPIKey = ref(false)
+
+  // 新增：AI 供应商状态
+  const aiProvider = ref('deepseek')
+  const providerList = [
+    { id: 'deepseek', name: 'DeepSeek', keyPlaceholder: '输入 DeepSeek API Key (sk-...)' },
+    { id: 'openai', name: 'OpenAI', keyPlaceholder: '输入 OpenAI API Key (sk-...)' },
+    { id: 'anthropic', name: 'Anthropic', keyPlaceholder: '输入 Anthropic API Key (sk-ant-...)' }
+  ]
 
   const lineHeightMap = {
     compact: '1.4',
@@ -107,7 +119,32 @@ export const useSettingsStore = defineStore('settings', () => {
     const newValue = aiSettings.value.ai_emotion_trend_enabled === 1 ? 0 : 1
     await saveAISettings({ ai_emotion_trend_enabled: newValue })
   }
-  
+
+  // 新增：加载 API Key 状态（后端只返回是否已配置，不返回实际值）
+  async function loadAPIKey() {
+    try {
+      const data = await getAPIKey()
+      hasAPIKey.value = data.has_api_key || false
+      apiKey.value = '' // 前端不保存实际 API Key
+    } catch (error) {
+      console.error('加载 API Key 状态失败:', error)
+      hasAPIKey.value = false
+    }
+  }
+
+  // 新增：保存 API Key
+  async function saveAPIKey(newApiKey) {
+    try {
+      await updateAPIKey({ api_key: newApiKey, provider: aiProvider.value })
+      // 保存成功后重新加载状态（后端不返回实际值）
+      await loadAPIKey()
+      return true
+    } catch (error) {
+      console.error('保存 API Key 失败:', error)
+      return false
+    }
+  }
+
   function applySettings() {
     const root = document.documentElement
     
@@ -142,11 +179,17 @@ export const useSettingsStore = defineStore('settings', () => {
     lineHeight,
     theme,
     aiSettings,
+    apiKey,
+    hasAPIKey,
+    aiProvider,
+    providerList,
     lineHeightMap,
     loadSettings,
     loadAISettings,
+    loadAPIKey,
     saveSettings,
     saveAISettings,
+    saveAPIKey,
     toggleAIEnabled,
     toggleAIReflection,
     toggleAIWeeklyReview,

@@ -34,6 +34,12 @@ const routes = [
         name: 'GardenSection',
         component: () => import('@/views/GardenSection.vue'),
         meta: { requiresAuth: true, page: 2 }
+      },
+      {
+        path: 'letters',
+        name: 'LetterSection',
+        component: () => import('@/views/LetterSection.vue'),
+        meta: { requiresAuth: true, page: 2 }
       }
     ]
   },

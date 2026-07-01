@@ -122,6 +122,12 @@ function initDb(dbPath) {
   // AI 设置字段迁移
   migrateUserSettingsAI(db);
 
+  // AI Reflection 缓存字段迁移
+  migrateUserSettingsAICache(db);
+
+  // 时光信箱表迁移
+  migrateFutureLettersTable(db);
+
   return db;
 }
 
@@ -408,6 +414,24 @@ function migrateUserSettingsAI(db) {
       console.log('✅ ai_emotion_trend_enabled 字段已存在，跳过迁移');
     }
 
+    // 添加 ai_api_key 字段（加密存储）
+    if (!columns.includes('ai_api_key')) {
+      console.log('⏳ 开始添加 ai_api_key 字段...');
+      db.exec('ALTER TABLE user_settings ADD COLUMN ai_api_key TEXT DEFAULT NULL');
+      console.log('✅ ai_api_key 字段添加成功');
+    } else {
+      console.log('✅ ai_api_key 字段已存在，跳过迁移');
+    }
+
+    // 添加 ai_provider 字段（供应商类型）
+    if (!columns.includes('ai_provider')) {
+      console.log('⏳ 开始添加 ai_provider 字段...');
+      db.exec('ALTER TABLE user_settings ADD COLUMN ai_provider TEXT DEFAULT \'deepseek\'');
+      console.log('✅ ai_provider 字段添加成功');
+    } else {
+      console.log('✅ ai_provider 字段已存在，跳过迁移');
+    }
+
     // 验证迁移结果
     const newTableInfo = db.prepare('PRAGMA table_info(user_settings)').all();
     const newColumns = newTableInfo.map(col => col.name);
@@ -420,6 +444,74 @@ function migrateUserSettingsAI(db) {
     console.log('✅ AI 设置字段迁移完成');
   } catch (error) {
     console.error('❌ AI 设置字段迁移失败:', error.message);
+    console.error('❌ 错误堆栈:', error.stack);
+  }
+}
+
+function migrateUserSettingsAICache(db) {
+  try {
+    console.log('🔄 准备执行 user_settings 表 AI 缓存字段迁移...');
+    const tableInfo = db.prepare('PRAGMA table_info(user_settings)').all();
+    const columns = tableInfo.map(col => col.name);
+
+    // 添加 ai_reflection_cache 字段（存储 JSON 格式的缓存数据）
+    if (!columns.includes('ai_reflection_cache')) {
+      console.log('⏳ 开始添加 ai_reflection_cache 字段...');
+      db.exec('ALTER TABLE user_settings ADD COLUMN ai_reflection_cache TEXT DEFAULT NULL');
+      console.log('✅ ai_reflection_cache 字段添加成功');
+    } else {
+      console.log('✅ ai_reflection_cache 字段已存在，跳过迁移');
+    }
+
+    // 添加 ai_reflection_updated_at 字段（缓存更新时间）
+    if (!columns.includes('ai_reflection_updated_at')) {
+      console.log('⏳ 开始添加 ai_reflection_updated_at 字段...');
+      db.exec('ALTER TABLE user_settings ADD COLUMN ai_reflection_updated_at TEXT DEFAULT NULL');
+      console.log('✅ ai_reflection_updated_at 字段添加成功');
+    } else {
+      console.log('✅ ai_reflection_updated_at 字段已存在，跳过迁移');
+    }
+
+    console.log('✅ AI 缓存字段迁移完成');
+  } catch (error) {
+    console.error('❌ AI 缓存字段迁移失败:', error.message);
+    console.error('❌ 错误堆栈:', error.stack);
+  }
+}
+
+function migrateFutureLettersTable(db) {
+  try {
+    const tableExists = db.prepare(
+      "SELECT name FROM sqlite_master WHERE type='table' AND name='future_letters'"
+    ).get();
+
+    if (!tableExists) {
+      console.log('⏳ 开始创建 future_letters 表...');
+
+      db.exec(`
+        CREATE TABLE IF NOT EXISTS future_letters (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          user_id INTEGER NOT NULL,
+          title TEXT,
+          content TEXT NOT NULL,
+          deliver_at TEXT NOT NULL,
+          is_opened BOOLEAN DEFAULT 0,
+          opened_at TEXT,
+          mood TEXT,
+          created_at TEXT NOT NULL DEFAULT (datetime('now', 'localtime')),
+          FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_future_letters_user_id ON future_letters(user_id);
+        CREATE INDEX IF NOT EXISTS idx_future_letters_deliver_at ON future_letters(deliver_at);
+      `);
+
+      console.log('✅ future_letters 表创建成功');
+    } else {
+      console.log('✅ future_letters 表已存在，跳过创建');
+    }
+  } catch (error) {
+    console.error('❌ future_letters 表迁移失败:', error.message);
     console.error('❌ 错误堆栈:', error.stack);
   }
 }

@@ -11,6 +11,8 @@ const pagesRouter = require('./routes/pages');
 const authRouter = require('./routes/auth');
 const favoritesRouter = require('./routes/favorites');
 const settingsRouter = require('./routes/settings');
+const aiRouter = require('./routes/ai');
+const lettersRouter = require('./routes/letters');
 
 // 验证 JWT_SECRET 是否设置
 if (!process.env.JWT_SECRET) {
@@ -68,6 +70,8 @@ app.use('/api/v1/diaries', diariesRouter);
 app.use('/api/v1/pages', pagesRouter);
 app.use('/api/v1/favorites', favoritesRouter);
 app.use('/api/v1/settings', settingsRouter);
+app.use('/api/v1/ai', aiRouter);
+app.use('/api/v1/letters', lettersRouter);
 
 app.use((err, req, res, _next) => {
   // 根据环境区分处理错误日志，生产环境不泄露堆栈

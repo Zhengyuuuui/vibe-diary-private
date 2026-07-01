@@ -53,6 +53,40 @@ AI 是辅助能力，不是产品核心。
 
 ## 创意一：时光信箱
 
+### 后端开发进度
+
+✅ **后端已完成（2026-06-27）**
+
+**已完成的功能**：
+- ✅ 数据库表 future_letters 创建（含索引、外键、用户隔离）
+- ✅ 完整 CRUD 路由（server/routes/letters.js）
+- ✅ authMiddleware 认证保护
+- ✅ 用户隔离（WHERE user_id = ?）
+- ✅ 创建信件（含时间校验，必须为未来时间）
+- ✅ 拆信功能（仅到期信件可拆，标记 is_opened 和 opened_at）
+- ✅ 已拆信件不可修改、不可重复拆开
+- ✅ 列表过滤（待拆/已拆/已到期）+ 分页
+- ✅ 统计接口（总数、待拆数、已到期数、已拆数）
+- ✅ 异常处理（try-catch）
+- ✅ 统一响应格式（{ code, msg, data }）
+
+**API 端点**：
+- `GET /api/v1/letters` - 列表（支持 status=pending|opened|deliverable 过滤 + 分页）
+- `GET /api/v1/letters/:id` - 详情
+- `POST /api/v1/letters` - 创建信件
+- `PUT /api/v1/letters/:id` - 更新（仅未到期可修改）
+- `DELETE /api/v1/letters/:id` - 删除
+- `GET /api/v1/letters/stats/overview` - 统计
+- `POST /api/v1/letters/:id/open` - 拆信（仅到期可拆）
+
+**测试结果**：全部 16 项测试通过
+
+**待完成的功能**：
+- ⏳ 前端集成（写信界面、信件列表、拆信仪式感动画）
+- ⏳ 通知机制（MVP 范围外，暂未实现定时任务和邮件通知）
+
+---
+
 ### 用户价值
 
 **强化回忆感与陪伴感**

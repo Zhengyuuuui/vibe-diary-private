@@ -34,23 +34,10 @@ router.get('/stats', authMiddleware, (req, res) => {
     const db = req.db;
     const userId = req.user.id;
 
-    const weeklyPages = db.prepare(`
-      SELECT COUNT(*) as count 
-      FROM pages p 
-      JOIN diaries d ON p.diary_id = d.id 
-      WHERE d.user_id = ? 
-      AND p.updated_at >= datetime('now', '-7 days', 'localtime')
-    `).get(userId).count;
+    // 1. 总日记数
+    const totalDiaries = db.prepare('SELECT COUNT(*) AS count FROM diaries WHERE user_id = ?').get(userId).count;
 
-    const streakDays = db.prepare(`
-      SELECT COUNT(DISTINCT date(updated_at)) as days
-      FROM pages p
-      JOIN diaries d ON p.diary_id = d.id
-      WHERE d.user_id = ?
-      AND p.updated_at >= datetime('now', '-30 days', 'localtime')
-      ORDER BY date(updated_at) DESC
-    `).get(userId).days;
-
+    // 2. 总页数
     const totalPages = db.prepare(`
       SELECT COUNT(*) as count
       FROM pages p
@@ -58,13 +45,27 @@ router.get('/stats', authMiddleware, (req, res) => {
       WHERE d.user_id = ?
     `).get(userId).count;
 
+    // 3. 计算连续记录天数（真正的连续天数，断档归零）
+    const streakResult = calculateStreakDays(db, userId);
+
+    // 4. 使用年数（基于 users.created_at）
+    const user = db.prepare('SELECT created_at FROM users WHERE id = ?').get(userId);
+    const yearsOfUse = calculateYearsOfUse(user?.created_at);
+
+    // 5. 里程碑判断
+    const milestones = checkMilestones(totalPages, streakResult.streak_days, yearsOfUse);
+
     res.json({
       code: 200,
       msg: '获取成功',
       data: {
-        weekly_pages: weeklyPages,
-        streak_days: streakDays,
-        total_pages: totalPages
+        total_entries: totalDiaries,
+        total_pages: totalPages,
+        streak_days: streakResult.streak_days,
+        max_streak_days: streakResult.max_streak_days,
+        years_of_use: yearsOfUse,
+        milestones: milestones,
+        weekly_pages: streakResult.weekly_pages
       }
     });
   } catch (error) {
@@ -72,6 +73,152 @@ router.get('/stats', authMiddleware, (req, res) => {
     res.status(500).json({ code: 500, msg: '获取失败', data: null });
   }
 });
+
+/**
+ * 计算连续记录天数
+ * @param {Object} db - 数据库实例
+ * @param {number} userId - 用户ID
+ * @returns {Object} - { streak_days, max_streak_days, weekly_pages }
+ */
+function calculateStreakDays(db, userId) {
+  // 获取用户所有有记录的日期（按日期降序排列）
+  const recordDates = db.prepare(`
+    SELECT DISTINCT DATE(p.updated_at) as record_date
+    FROM pages p
+    JOIN diaries d ON p.diary_id = d.id
+    WHERE d.user_id = ?
+    AND p.updated_at IS NOT NULL
+    ORDER BY record_date DESC
+  `).all(userId);
+
+  if (recordDates.length === 0) {
+    return { streak_days: 0, max_streak_days: 0, weekly_pages: 0 };
+  }
+
+  // 计算本周页数
+  const weeklyPages = db.prepare(`
+    SELECT COUNT(*) as count 
+    FROM pages p 
+    JOIN diaries d ON p.diary_id = d.id 
+    WHERE d.user_id = ? 
+    AND p.updated_at >= datetime('now', '-7 days', 'localtime')
+  `).get(userId).count;
+
+  // 计算当前连续天数
+  const today = new Date().toISOString().split('T')[0];
+  let streakDays = 0;
+  let currentDate = new Date(today);
+
+  for (const record of recordDates) {
+    const recordDate = record.record_date;
+    if (!recordDate) continue;
+
+    const expectedDate = currentDate.toISOString().split('T')[0];
+
+    if (recordDate === expectedDate) {
+      streakDays++;
+      currentDate.setDate(currentDate.getDate() - 1);
+    } else if (recordDate === new Date(currentDate.getTime() - 86400000).toISOString().split('T')[0]) {
+      // 允许昨天（用户今天还没记录，但昨天记录了）
+      streakDays++;
+      currentDate.setDate(currentDate.getDate() - 2);
+    } else {
+      // 断档，停止计数
+      break;
+    }
+  }
+
+  // 计算历史最长连续天数
+  let maxStreakDays = 0;
+  let tempStreak = 1;
+  const dateStrings = recordDates.map(r => r.record_date).filter(d => d);
+
+  for (let i = 1; i < dateStrings.length; i++) {
+    const prevDate = new Date(dateStrings[i - 1]);
+    const currDate = new Date(dateStrings[i]);
+    const diffDays = Math.floor((prevDate - currDate) / 86400000);
+
+    if (diffDays === 1) {
+      tempStreak++;
+      maxStreakDays = Math.max(maxStreakDays, tempStreak);
+    } else {
+      tempStreak = 1;
+    }
+  }
+  maxStreakDays = Math.max(maxStreakDays, streakDays, 1);
+
+  return { streak_days: streakDays, max_streak_days: maxStreakDays, weekly_pages: weeklyPages };
+}
+
+/**
+ * 计算使用年数
+ * @param {string} createdAt - 用户创建时间
+ * @returns {number} - 使用年数（小数）
+ */
+function calculateYearsOfUse(createdAt) {
+  if (!createdAt) return 0;
+
+  const createdDate = new Date(createdAt);
+  const now = new Date();
+  const diffMs = now - createdDate;
+  const years = diffMs / (365.25 * 24 * 60 * 60 * 1000);
+
+  return Math.round(years * 10) / 10; // 保留1位小数
+}
+
+/**
+ * 检查里程碑达成情况
+ * @param {number} totalPages - 总页数
+ * @param {number} streakDays - 连续天数
+ * @param {number} yearsOfUse - 使用年数
+ * @returns {Array} - 里程碑列表
+ */
+function checkMilestones(totalPages, streakDays, yearsOfUse) {
+  const milestoneDefinitions = [
+    { id: 'pages_100', name: '第100页', type: 'pages', target: 100, icon: '📖' },
+    { id: 'pages_365', name: '第365页', type: 'pages', target: 365, icon: '📚' },
+    { id: 'pages_1000', name: '第1000页', type: 'pages', target: 1000, icon: '🏆' },
+    { id: 'streak_30', name: '连续30天', type: 'streak', target: 30, icon: '🔥' },
+    { id: 'streak_100', name: '连续100天', type: 'streak', target: 100, icon: '💪' },
+    { id: 'streak_365', name: '连续365天', type: 'streak', target: 365, icon: '⭐' },
+    { id: 'years_1', name: '使用满1年', type: 'years', target: 1, icon: '🎂' },
+    { id: 'years_3', name: '使用满3年', type: 'years', target: 3, icon: '🎉' },
+    { id: 'years_5', name: '使用满5年', type: 'years', target: 5, icon: '🌟' }
+  ];
+
+  return milestoneDefinitions.map(milestone => {
+    let current = 0;
+    let achieved = false;
+
+    switch (milestone.type) {
+      case 'pages':
+        current = totalPages;
+        achieved = totalPages >= milestone.target;
+        break;
+      case 'streak':
+        current = streakDays;
+        achieved = streakDays >= milestone.target;
+        break;
+      case 'years':
+        current = yearsOfUse;
+        achieved = yearsOfUse >= milestone.target;
+        break;
+    }
+
+    const progress = Math.min(100, Math.round((current / milestone.target) * 100));
+
+    return {
+      id: milestone.id,
+      name: milestone.name,
+      type: milestone.type,
+      target: milestone.target,
+      current: current,
+      progress: progress,
+      achieved: achieved,
+      icon: milestone.icon
+    };
+  });
+}
 
 router.get('/random-fragment', authMiddleware, (req, res) => {
   try {

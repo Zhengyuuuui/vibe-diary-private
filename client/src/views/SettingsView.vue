@@ -3,11 +3,14 @@ import { ref, onMounted, watch, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useSettingsStore } from '@/stores/settings'
 import { useAuthStore } from '@/stores/auth'
+import { useLettersStore } from '@/stores/letters'
+import MessageCenter from '@/components/MessageCenter.vue'
 import { getProfile, updateProfile, uploadAvatar } from '@/api'
 
 const router = useRouter()
 const settingsStore = useSettingsStore()
 const authStore = useAuthStore()
+const lettersStore = useLettersStore()
 
 const profile = ref({
   penName: '',
@@ -20,6 +23,14 @@ const avatarFile = ref(null)
 const avatarInput = ref(null)
 const isLoading = ref(true)
 const isLoggedIn = ref(false)
+
+// API Key 相关状态
+const apiKeyInput = ref('')
+const isSavingAPIKey = ref(false)
+const showAPIKey = ref(false)
+
+// 新增：消息中心弹窗
+const showMessageCenter = ref(false)
 
 const themes = [
   { id: 'light', name: '极简素白', subtitle: 'Light Sanctuary' },
@@ -35,9 +46,43 @@ onMounted(async () => {
     await loadProfile()
     await loadSettings()
     await settingsStore.loadAISettings() // 新增：加载 AI 设置
+    await loadAPIKey() // 新增：加载 API Key 状态
+    lettersStore.loadStats().catch(() => {}) // 新增：加载信箱统计（红点提示）
   }
   isLoading.value = false
 })
+
+// 新增：加载 API Key 状态（不显示实际值，只显示是否已配置）
+async function loadAPIKey() {
+  try {
+    await settingsStore.loadAPIKey()
+    // apiKeyInput 保持空值，用户输入新值即可
+    apiKeyInput.value = ''
+  } catch (error) {
+    console.error('加载 API Key 状态失败:', error)
+  }
+}
+
+// 新增：保存 API Key
+async function saveAPIKeySetting() {
+  isSavingAPIKey.value = true
+  try {
+    await settingsStore.saveAPIKey(apiKeyInput.value)
+    // 保存成功后重新加载，确保 apiKeyInput 显示后端实际存储的值
+    await loadAPIKey()
+    alert('API Key 保存成功！')
+  } catch (error) {
+    console.error('保存 API Key 失败:', error)
+    alert('保存失败: ' + error.message)
+  } finally {
+    isSavingAPIKey.value = false
+  }
+}
+
+// 新增：切换 API Key 显示/隐藏
+function toggleShowAPIKey() {
+  showAPIKey.value = !showAPIKey.value
+}
 
 async function loadProfile() {
   try {
@@ -191,6 +236,18 @@ async function toggleAIEmotionTrend() {
           <a href="#" class="text-primary font-bold font-label text-xs uppercase tracking-widest">设置</a>
         </div>
         <div class="flex gap-4">
+          <!-- 信箱图标 + 红点 -->
+          <button
+            @click="showMessageCenter = true"
+            class="relative flex items-center justify-center cursor-pointer hover:scale-110 transition-transform"
+            title="时光信箱"
+          >
+            <span class="material-symbols-outlined text-primary">mail</span>
+            <span
+              v-if="lettersStore.deliverableCount > 0"
+              class="absolute top-0 right-0 w-4 h-4 bg-secondary text-on-secondary rounded-full flex items-center justify-center text-[8px] font-bold animate-pulse"
+            ></span>
+          </button>
           <span class="material-symbols-outlined text-primary cursor-pointer hover:scale-110 transition-transform">filter_list</span>
           <button @click="handleLogout" class="material-symbols-outlined text-primary cursor-pointer hover:scale-110 transition-transform" title="退出登录">logout</button>
         </div>
@@ -496,6 +553,69 @@ async function toggleAIEmotionTrend() {
             </button>
           </div>
 
+          <!-- API Key 配置 -->
+          <div v-if="settingsStore.aiSettings.ai_enabled" class="mt-6 pt-6 border-t border-outline-variant/20">
+            <!-- API Key 输入区域 -->
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h4 class="font-headline text-lg text-primary">API Key 配置</h4>
+                <p class="font-body text-sm text-on-surface-variant">
+                  使用您自己的 AI 服务密钥
+                </p>
+              </div>
+              <button
+                @click="toggleShowAPIKey"
+                class="w-10 h-10 rounded-full flex items-center justify-center bg-surface-container-highest border border-primary/20 text-primary hover:bg-primary/10 transition-all cursor-pointer"
+              >
+                <span class="material-symbols-outlined text-base">
+                  {{ showAPIKey ? 'visibility_off' : 'visibility' }}
+                </span>
+              </button>
+            </div>
+
+            <!-- 已配置状态提示 -->
+            <div v-if="settingsStore.hasAPIKey" class="mb-4 p-3 bg-primary/10 rounded-lg flex items-center gap-2">
+              <span class="material-symbols-outlined text-primary text-lg">check_circle</span>
+              <p class="font-body text-sm text-primary">
+                API Key 已配置，AI 功能可正常使用。
+              </p>
+            </div>
+
+            <!-- API Key 输入框 -->
+            <div class="flex gap-3">
+              <input
+                v-model="apiKeyInput"
+                :type="showAPIKey ? 'text' : 'password'"
+                :placeholder="settingsStore.hasAPIKey ? '输入新 API Key 以更新' : '输入您的 API Key'"
+                class="flex-1 px-4 py-3 rounded-lg bg-surface-container-highest border border-outline-variant/20 text-on-surface font-body text-sm focus:outline-none focus:border-primary/50 transition-colors"
+              />
+              <button
+                @click="saveAPIKeySetting"
+                :disabled="isSavingAPIKey"
+                class="px-6 py-3 rounded-lg bg-primary text-on-primary font-label text-sm uppercase tracking-widest hover:scale-95 transition-transform disabled:opacity-50"
+              >
+                {{ isSavingAPIKey ? '保存中...' : '保存' }}
+              </button>
+            </div>
+
+            <!-- 安全提示 -->
+            <div class="mt-4 p-3 bg-surface-container rounded-lg">
+              <p class="font-body text-xs text-on-surface-variant">
+                <strong class="text-primary">安全说明：</strong>
+                您的 API Key 将加密存储，前端不显示实际值。
+                输入新值并保存即可更新。
+              </p>
+            </div>
+
+            <!-- 降级提示：未配置 API Key -->
+            <div v-if="!settingsStore.hasAPIKey" class="mt-4 p-3 bg-surface-container rounded-lg flex items-center gap-2">
+              <span class="material-symbols-outlined text-warning text-lg">warning</span>
+              <p class="font-body text-xs text-on-surface-variant">
+                未配置 API Key，AI 功能将使用系统默认配置（可能有调用限制）。
+              </p>
+            </div>
+          </div>
+
           <!-- 隐私说明 -->
           <div class="mt-8 p-4 bg-surface-container rounded-lg">
             <p class="font-body text-xs text-on-surface-variant leading-relaxed">
@@ -528,21 +648,27 @@ async function toggleAIEmotionTrend() {
     <nav class="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-md z-50 flex justify-around items-center py-3 px-4 bg-surface-90 backdrop-blur-lg rounded-full shadow-[0_20_40px_rgba(105,93,74,0.06)]">
       <a href="/" class="flex flex-col items-center justify-center text-primary/40 hover:text-primary transition-all">
         <span class="material-symbols-outlined">auto_stories</span>
-        <span class="font-label text-[10px] uppercase tracking-widest">首页</span>
+        <span class="font-label text-[10px] uppercase tracking-widest mt-1">首页</span>
       </a>
       <a href="/reflection" class="flex flex-col items-center justify-center text-primary/40 hover:text-primary transition-all">
         <span class="material-symbols-outlined">inventory_2</span>
-        <span class="font-label text-[10px] uppercase tracking-widest">回望</span>
+        <span class="font-label text-[10px] uppercase tracking-widest mt-1">回望</span>
       </a>
       <a href="/favorites" class="flex flex-col items-center justify-center text-primary/40 hover:text-primary transition-all">
         <span class="material-symbols-outlined">star</span>
-        <span class="font-label text-[10px] uppercase tracking-widest">灵感</span>
+        <span class="font-label text-[10px] uppercase tracking-widest mt-1">灵感</span>
       </a>
       <a href="#" class="flex flex-col items-center justify-center text-primary scale-110 active:scale-90 duration-200">
         <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">settings</span>
-        <span class="font-label text-[10px] uppercase tracking-widest">设置</span>
+        <span class="font-label text-[10px] uppercase tracking-widest mt-1">设置</span>
       </a>
     </nav>
+
+    <!-- 消息中心弹窗 -->
+    <MessageCenter
+      :show="showMessageCenter"
+      @close="showMessageCenter = false"
+    />
   </div>
 </template>
 

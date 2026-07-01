@@ -199,3 +199,75 @@ export function updateAISettings(data) {
     body: JSON.stringify(data)
   })
 }
+
+// 新增：获取 AI API Key 状态（后端不返回实际 Key，只返回是否已配置）
+export function getAPIKey() {
+  return request('/settings/ai-api-key')
+}
+
+// 新增：更新 AI API Key
+export function updateAPIKey(data) {
+  return request('/settings/ai-api-key', {
+    method: 'PUT',
+    body: JSON.stringify(data)
+  })
+}
+
+// 新增：获取 AI Reflection 数据
+export function getAIReflection() {
+  return request('/ai/reflection', {
+    method: 'POST'
+  })
+}
+
+// ==================== 时光信箱 API ====================
+
+// 获取信件列表（支持状态过滤、分页）
+export function getLetters(params = {}) {
+  const query = new URLSearchParams({
+    page: params.page || 1,
+    limit: params.limit || 20,
+    ...(params.status && { status: params.status })
+  })
+  return request(`/letters?${query}`)
+}
+
+// 获取信件详情
+export function getLetter(id) {
+  return request(`/letters/${id}`)
+}
+
+// 创建信件
+export function createLetter(data) {
+  return request('/letters', {
+    method: 'POST',
+    body: JSON.stringify(data)
+  })
+}
+
+// 更新信件（仅未到期）
+export function updateLetter(id, data) {
+  return request(`/letters/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data)
+  })
+}
+
+// 删除信件
+export function deleteLetter(id) {
+  return request(`/letters/${id}`, {
+    method: 'DELETE'
+  })
+}
+
+// 获取信件统计概览
+export function getLetterStats() {
+  return request('/letters/stats/overview')
+}
+
+// 拆信（仅到期信件）
+export function openLetter(id) {
+  return request(`/letters/${id}/open`, {
+    method: 'POST'
+  })
+}
