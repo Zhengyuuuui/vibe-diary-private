@@ -734,23 +734,23 @@ watch(filterValues, (newVal) => {
       </div>
 
       <nav class="mobile-bottom-nav">
-        <a href="/" class="flex flex-col items-center text-primary/40 hover:text-primary transition-all">
-          <span class="material-symbols-outlined">auto_stories</span>
-          <span class="font-label text-[10px] uppercase tracking-widest mt-1">首页</span>
-        </a>
-        <a href="/reflection" class="flex flex-col items-center text-primary/40 hover:text-primary transition-all">
-          <span class="material-symbols-outlined">inventory_2</span>
-          <span class="font-label text-[10px] uppercase tracking-widest mt-1">回望</span>
-        </a>
-        <a href="#" class="flex flex-col items-center text-primary scale-110">
-          <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
-          <span class="font-label text-[10px] uppercase tracking-widest mt-1">灵感</span>
-        </a>
-        <a href="/settings" class="flex flex-col items-center text-primary/40 hover:text-primary transition-all">
-          <span class="material-symbols-outlined">settings</span>
-          <span class="font-label text-[10px] uppercase tracking-widest mt-1">设置</span>
-        </a>
-      </nav>
+  <router-link to="/" class="flex flex-col items-center text-primary/40 hover:text-primary transition-all">
+    <span class="material-symbols-outlined">auto_stories</span>
+    <span class="font-label text-[10px] uppercase tracking-widest mt-1">首页</span>
+  </router-link>
+  <router-link to="/reflection" class="flex flex-col items-center text-primary/40 hover:text-primary transition-all">
+    <span class="material-symbols-outlined">inventory_2</span>
+    <span class="font-label text-[10px] uppercase tracking-widest mt-1">回望</span>
+  </router-link>
+  <router-link to="/favorites" class="flex flex-col items-center text-primary scale-110">
+    <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
+    <span class="font-label text-[10px] uppercase tracking-widest mt-1">灵感</span>
+  </router-link>
+  <router-link to="/settings" class="flex flex-col items-center text-primary/40 hover:text-primary transition-all">
+    <span class="material-symbols-outlined">settings</span>
+    <span class="font-label text-[10px] uppercase tracking-widest mt-1">设置</span>
+  </router-link>
+</nav>
     </div>
 
     <!-- 弹窗 -->
